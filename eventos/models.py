@@ -1,7 +1,4 @@
 from django.db import models
-
-# Create your models here.
-
 from django.contrib.gis.db import models
 
 class Evento(models.Model):
@@ -15,24 +12,19 @@ class Evento(models.Model):
     nome = models.CharField(max_length=200)
     descricao = models.TextField()
     data_evento = models.DateTimeField()
+    
+    # Novo campo para o nome do estabelecimento ou apelido do local
+    nome_local = models.CharField(max_length=255, verbose_name="Nome do Local (Ex: Teatro, Praça X)", help_text="Nome legível do lugar")
 
-    # Campo para filtrar por categoria [cite: 137]
     categoria = models.CharField(
         max_length=4,
         choices=CATEGORIAS_CHOICES,
         default='CULT'
     )
 
-    # Diferenciação visual para o "Selo Evento Solidário" [cite: 125, 138]
     is_beneficente = models.BooleanField(default=False)
-
-    # Link para inscrição em plataformas externas (Sympla/WhatsApp) [cite: 113, 131]
     link_externo = models.URLField(max_length=500)
-
-    # O "Pin" no mapa para geolocalização [cite: 96, 118]
     localizacao = models.PointField()
 
     def __str__(self):
         return f"{self.nome} - {self.get_categoria_display()}"
-
-
