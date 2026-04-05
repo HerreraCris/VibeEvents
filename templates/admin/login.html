@@ -1,0 +1,30 @@
+{% extends "admin/login.html" %}
+{% load static %}
+
+{% block extrastyle %}
+{{ block.super }}
+<style>
+    body { background-color: #101624 !important; }
+    #container { 
+        background: transparent !important; 
+        box-shadow: none !important;
+    }
+    #login-form {
+        background: #161e2e;
+        border-radius: 16px;
+        padding: 40px;
+        border: 1px solid #2d3748;
+    }
+    .login .submit-row input {
+        width: 100%;
+        background: #7DACFD !important;
+        border-radius: 10px !important;
+    }
+</style>
+{% endblock %}
+
+{% block branding %}
+<div id="branding">
+    <img src="{% static 'img/vibeevents-icon.png' %}" style="height: 60px;">
+</div>
+{% endblock %}

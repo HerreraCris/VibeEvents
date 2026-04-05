@@ -20,4 +20,5 @@ from . import views
 urlpatterns = [
     # Quando o caminho for vazio (''), chama a função mapa_eventos
     path('', views.mapa_eventos, name='mapa_eventos'),
+    path('curadoria/novo/', views.cadastrar_evento_curadoria, name='curadoria_novo')
 ]
