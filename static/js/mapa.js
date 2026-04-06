@@ -1,4 +1,5 @@
 const initMap = (containerId, eventosData) => {
+    // Centraliza o mapa (Ajuste as coordenadas iniciais se necessário)
     const map = L.map(containerId).setView([-10.18, -48.33], 13);
     
     L.tileLayer('https://tiles.stadiamaps.com/tiles/alidade_smooth_dark/{z}/{x}/{y}{r}.png', {
@@ -16,17 +17,52 @@ const initMap = (containerId, eventosData) => {
 
     eventosData.forEach(evento => {
         if (evento.localizacao) {
-            const coords = evento.localizacao.coordinates;
-            const markerIcon = icons[evento.categoria] || icons['CULT']; 
-            const marker = L.marker([coords[1], coords[0]], { icon: markerIcon }).addTo(map);
+            const coords = evento.localizacao.coordinates; // [longitude, latitude]
+            const lat = coords[1];
+            const lng = coords[0];
             
+            const markerIcon = icons[evento.categoria] || icons['CULT']; 
+            const marker = L.marker([lat, lng], { icon: markerIcon }).addTo(map);
+            
+            // Criamos um ID único para o elemento de endereço do popup
+            const addressId = `addr-${Math.random().toString(36).substr(2, 9)}`;
+
             marker.bindPopup(`
                 <div class="map-popup">
-                    <h3>${evento.nome}</h3>
-                    <p><b>Data:</b> ${new Date(evento.data_evento).toLocaleString('pt-BR')}</p>
-                    <button class="vibe-button" onclick="window.open('${evento.link_externo}', '_blank')">Garantir Ingresso</button>
+                    <h3 style="margin-bottom: 5px;">${evento.nome}</h3>
+                    <p style="color: #666; font-size: 0.9em; margin-top: 0;">${evento.nome_local}</p>
+
+                    <p><b>📅 Data:</b> ${new Date(evento.data_evento).toLocaleString('pt-BR')}</p>
+                    <p><b>📝 Descrição:</b><br>${evento.descricao}</p>
+
+                    <p><b>📍 Endereço:</b><br>
+                        <span id="${addressId}" style="font-style: italic; color: #555;">Buscando endereço...</span>
+                    </p>
+
+                    <button class="vibe-button" 
+                        style="width: 100%; margin-top: 10px; cursor: pointer;"
+                        onclick="window.open('${evento.link_externo}', '_blank')">
+                        Garantir Ingresso
+                    </button>
                 </div>
             `);
+
+            // Evento disparado quando o popup abre: busca o endereço via API
+            marker.on('popupopen', function() {
+                fetch(`https://nominatim.openstreetmap.org/reverse?format=jsonv2&lat=${lat}&lon=${lng}`)
+                    .then(response => response.json())
+                    .then(data => {
+                        const addressElement = document.getElementById(addressId);
+                        if (addressElement) {
+                            // Pega o endereço formatado ou uma mensagem de erro amigável
+                            addressElement.innerText = data.display_name || "Endereço não identificado";
+                        }
+                    })
+                    .catch(() => {
+                        const addressElement = document.getElementById(addressId);
+                        if (addressElement) addressElement.innerText = "Erro ao carregar endereço.";
+                    });
+            });
         }
     });
 };
