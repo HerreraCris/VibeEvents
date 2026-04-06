@@ -1,0 +1,187 @@
+{% load static %}
+{% load leaflet_tags %}
+<!DOCTYPE html>
+<html lang="pt-br" data-bs-theme="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Curadoria | Novo Evento</title>
+    
+    <link rel="stylesheet" href="{% static 'bootstrap-5.3.8/css/bootstrap.min.css' %}">
+    
+    {% leaflet_js plugins="forms" %}
+    {% leaflet_css plugins="forms" %}
+
+    <style>
+        /* Estilos de Identidade Visual VibeEvents */
+        body { 
+            background-color: #0b0f19; 
+            color: #e2e8f0; 
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+        }
+        
+        .vibe-card { 
+            background: #121826; 
+            border: 1px solid #222b3e; 
+            border-radius: 20px; 
+            padding: 40px; 
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+        }
+        
+        .vibe-accent { color: #7DACFD; }
+        
+        /* Ajuste do Mapa para evitar o erro de 'height 0' */
+        .leaflet-container-default, .leaflet-container { 
+            height: 480px !important; 
+            width: 100% !important;
+            border-radius: 15px;
+            border: 1px solid #222b3e;
+            background: #0b0f19 !important; /* Fundo para enquanto carrega */
+        }
+
+        /* Estilo para os inputs do Django */
+        input, select, textarea {
+            transition: border-color 0.3s shadow 0.3s;
+        }
+
+        input:focus, select:focus, textarea:focus {
+            border-color: #7DACFD !important;
+            box-shadow: 0 0 0 0.25 cereal rgba(125, 172, 253, 0.25) !important;
+        }
+
+        .btn-vibe { 
+            background: #7DACFD; 
+            color: #0b0f19; 
+            font-weight: bold; 
+            border-radius: 12px; 
+            padding: 15px; 
+            border: none;
+            font-size: 1.1rem;
+            transition: all 0.3s ease;
+        }
+
+        .btn-vibe:hover { 
+            background: #93b9ff; 
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(125,172,253,0.3);
+        }
+
+        /* Esconde ferramentas de desenho desnecessárias se houver */
+        /* .leaflet-draw-toolbar { display: none !important; } */
+
+        .leaflet-draw-toolbar a {
+            background-color: #161e2e !important;
+            border-color: #222b3e !important;
+            color: white !important;
+        }
+
+        #mapa-curadoria-leaflet-map, .leaflet-container-default {
+            height: 480px !important;
+            width: 100% !important;
+            min-height: 480px !important;
+        }
+
+        .leaflet-container {
+            visibility: visible !important;
+        }
+    </style>
+
+    {{ form.media }} 
+</head>
+
+<body>
+
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-11 col-xl-10">
+            
+            <div class="text-center mb-5">
+                <img src="{% static 'img/vibeevents-icon.png' %}" alt="VibeEvents Logo" style="height: 150px;">
+                <p class="text-muted mt-3 letter-spacing-1 text-uppercase small">Painel de Curadoria de Experiências</p>
+            </div>
+
+            <div class="vibe-card">
+                <h2 class="fw-bold mb-4">Novo <span class="vibe-accent">Evento.</span></h2>
+                
+                <form method="post" novalidate>
+                    {% csrf_token %}
+                    
+                    <div class="row g-5">
+                        <div class="col-md-6">
+                            <div class="mb-4">
+                                <label class="form-label fw-semibold">Nome da Experiência</label>
+                                {{ form.nome }}
+                            </div>
+
+                            <div class="row mb-4">
+                                <div class="col-7">
+                                    <label class="form-label fw-semibold">Categoria</label>
+                                    {{ form.categoria }}
+                                </div>
+                                <div class="col-5">
+                                    <label class="form-label fw-semibold text-center d-block">Solidário?</label>
+                                    <div class="form-check form-switch d-flex justify-content-center pt-1">
+                                        {{ form.is_beneficente }}
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="mb-4">
+                                <label class="form-label fw-semibold">Data e Horário</label>
+                                {{ form.data_evento }}
+                            </div>
+
+                            <div class="mb-4">
+                                <label class="form-label fw-semibold">Link de Inscrição / Compra</label>
+                                {{ form.link_externo }}
+                            </div>
+
+                            <div class="mb-0">
+                                <label class="form-label fw-semibold">Breve Descrição</label>
+                                {{ form.descricao }}
+                            </div>
+                        </div>
+
+                        <div class="col-md-6 d-flex flex-column">
+                            <label class="form-label vibe-accent fw-bold mb-3">
+                                <i class="bi bi-geo-alt-fill"></i> Localização Geográfica (Clique no Mapa)
+                            </label>
+                            <div class="flex-grow-1 overflow-hidden shadow-sm">
+                                {{ form.localizacao }}
+                            </div>
+                            <div class="alert alert-dark border-0 bg-opacity-25 mt-3 small text-center" style="background-color: #1a2234;">
+                                <i class="bi bi-info-circle me-1"></i> 
+                                O Pin aparecerá no mapa público imediatamente após o cadastro.
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="mt-5">
+                        <button type="submit" class="btn btn-vibe w-100">
+                            Publicar Evento no Mapa 🚀
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="{% static 'bootstrap-5.3.8/js/bootstrap.bundle.min.js' %}"></script>
+
+<script>
+    window.addEventListener('map:init', function (e) {
+        var detail = e.detail;
+        // Pequeno atraso para garantir que o grid do Bootstrap terminou o reflow
+        setTimeout(function() {
+            detail.map.invalidateSize();
+            // Opcional: Centraliza o mapa em Palmas ao carregar
+            detail.map.setView([-10.18, -48.33], 13);
+        }, 300);
+    }, false);
+</script>
+
+</body>
+</html> 

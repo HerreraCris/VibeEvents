@@ -1,0 +1,109 @@
+
+:root {
+    /* Cores calibradas para alto contraste */
+    --bg-dark: #0b0f19;
+    --vibe-blue: #7DACFD;
+    --text-main: #FFFFFF;
+    --text-muted: #94a3b8;
+    --vibe-card: #121826;
+    --vibe-border: #222b3e;
+}
+
+/* 1. Suavização de Fontes (Movido para dentro do CSS corretamente) */
+body {
+    margin: 0;
+    padding: 0;
+    background-color: var(--bg-dark);
+    color: var(--text-main);
+    font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+    -webkit-font-smoothing: antialiased; /*  */
+    -moz-osx-font-smoothing: grayscale;
+    text-rendering: optimizeLegibility;
+}
+
+#map {
+    height: 100vh;
+    width: 100%; /* [cite: 40, 66, 76] */
+}
+
+/* 2. Barra Lateral e Títulos */
+h6.text-muted {
+    color: var(--text-muted) !important;
+    font-weight: 700 !important;
+    text-transform: uppercase;
+    font-size: 0.75rem;
+    letter-spacing: 0.08rem;
+    text-shadow: 0px 1px 2px rgba(0,0,0,0.5);
+    margin-bottom: 15px;
+}
+
+/* 3. Cards de Eventos (Sidebar) */
+.card {
+    background-color: var(--vibe-card) !important; /* [cite: 16, 20, 63] */
+    border: 1px solid var(--vibe-border) !important; /* [cite: 59, 63] */
+    border-radius: 12px;
+    transition: transform 0.2s ease;
+}
+
+.card:hover {
+    transform: translateY(-2px);
+    border-color: var(--vibe-blue) !important;
+}
+
+.card h6 {
+    color: var(--text-main) !important;
+    font-weight: 700 !important;
+    font-size: 1.05rem;
+    margin-bottom: 5px;
+}
+
+.card p {
+    color: var(--text-muted) !important;
+    font-weight: 500;
+    font-size: 0.85rem;
+    margin-bottom: 0;
+}
+
+/* 4. Filtros (Badges) */
+.filter-badge {
+    cursor: pointer;
+    transition: 0.3s;
+    border: 1px solid var(--vibe-border);
+    padding: 8px 16px;
+    border-radius: 20px;
+    font-size: 0.85rem;
+    font-weight: 600 !important;
+    margin-bottom: 10px;
+    display: inline-block;
+    color: #F8FAFC !important;
+    background: #1e293b;
+    text-shadow: 0 1px 2px rgba(0,0,0,0.5);
+}
+
+.filter-badge.active {
+    background: var(--vibe-blue) !important; /* [cite: 60, 70] */
+    color: #0b0f19 !important;
+    border-color: var(--vibe-blue);
+    font-weight: 700 !important;
+}
+
+/* 5. Botões Popups */
+.vibe-button {
+    background-color: var(--vibe-blue); /* [cite: 26, 40] */
+    color: var(--bg-dark);
+    border: none;
+    padding: 12px 24px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-weight: 700;
+    width: 100%; /* [cite: 40, 50] */
+    transition: all 0.3s ease;
+    text-transform: uppercase;
+    font-size: 0.8rem;
+    letter-spacing: 1px;
+}
+
+.vibe-button:hover {
+    background-color: #93b9ff; /* [cite: 29, 72] */
+    box-shadow: 0 0 15px rgba(125, 172, 253, 0.4);
+}

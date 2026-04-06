@@ -1,0 +1,20 @@
+{% extends "admin/base.html" %}
+{% load static %}
+
+{% block branding %}
+<div class="vibe-navbar-brand">
+    <img src="{% static 'img/vibeevents-icon.png' %}" alt="VibeEvents Logo">
+</div>
+{% endblock %}
+
+{% block nav-global %}{% endblock %} {% block userlinks %}
+    <div class="vibe-user-tools">
+        <span>Olá, <strong>{{ user.get_username }}</strong></span>
+        <a href="{% url 'admin:logout' %}">Sair</a>
+    </div>
+{% endblock %}
+
+{% block extrastyle %}
+    {{ block.super }}
+    <link rel="stylesheet" href="{% static 'css/admin_custom.css' %}">
+{% endblock %}

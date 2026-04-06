@@ -1,0 +1,120 @@
+/* Variáveis baseadas na sua imagem de referência */
+:root {
+    --vibe-bg: #0b0f19;
+    --vibe-card: #121826;
+    --vibe-accent: #7DACFD; /* Azul elétrico do botão */
+    --vibe-border: #222b3e;
+    --vibe-text: #e2e8f0;
+    --vibe-muted: #94a3b8;
+}
+
+/* Fundo Geral */
+body, #content, .module, #container {
+    background-color: var(--vibe-bg) !important;
+    color: var(--vibe-text) !important;
+}
+
+/* Header Superior */
+#header {
+    background: var(--vibe-bg) !important;
+    border-bottom: 1px solid var(--vibe-border) !important;
+    padding: 15px 40px !important;
+}
+
+/* Cards (Módulos do Admin) */
+.module {
+    background: var(--vibe-card) !important;
+    border: 1px solid var(--vibe-border) !important;
+    border-radius: 12px !important;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.3) !important;
+    overflow: hidden;
+    margin-bottom: 20px !important;
+}
+
+/* Barra de Título dos Módulos */
+.module h2, .module caption, .inline-group h2 {
+    background: transparent !important;
+    color: var(--vibe-accent) !important;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    font-size: 0.85rem;
+    padding: 15px !important;
+    border-bottom: 1px solid var(--vibe-border) !important;
+}
+
+/* Links e Tabelas */
+a:link, a:visited { color: var(--vibe-accent) !important; }
+
+#result_list thead th {
+    background: var(--vibe-border) !important;
+    border-bottom: none !important;
+    color: var(--vibe-muted) !important;
+}
+
+.row1 { background: #161e2e !important; }
+.row2 { background: #121826 !important; }
+
+/* Botões (Igual ao 'Cadastrar Evento' da imagem) */
+.button, input[type=submit], .default {
+    background: var(--vibe-accent) !important;
+    color: #0b0f19 !important;
+    border: none !important;
+    border-radius: 8px !important;
+    padding: 12px 25px !important;
+    font-weight: bold !important;
+    box-shadow: 0 0 15px rgba(125, 172, 253, 0.3) !important;
+    transition: transform 0.2s ease !important;
+}
+
+.button:hover {
+    transform: scale(1.02);
+    background: #93b9ff !important;
+}
+
+/* Formulários (Inputs) */
+input[type=text], input[type=password], select, textarea, .vTimeField, .vDateField {
+    background: #080b13 !important;
+    border: 1px solid var(--vibe-border) !important;
+    border-radius: 6px !important;
+    color: white !important;
+    padding: 8px !important;
+}
+
+/* Dashboard Sidebar (Recent Actions) */
+#content-main { float: left; width: 70%; }
+#content-related { 
+    float: right; 
+    width: 25%; 
+    background: var(--vibe-card) !important;
+    border-radius: 12px;
+    padding: 20px;
+    border: 1px solid var(--vibe-border);
+}
+
+.login #container {
+    background: transparent !important;
+    border: none !important;
+    width: 100% !important;
+    max-width: 420px !important;
+    margin: 0 auto !important;
+}
+
+.login #content {
+    background: var(--vibe-card) !important;
+    border: 1px solid var(--vibe-border) !important;
+    border-radius: 20px !important;
+    padding: 40px !important;
+    box-shadow: 0 20px 50px rgba(0,0,0,0.5) !important;
+}
+
+/* Centraliza o corpo da página de login */
+body.login {
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    min-height: 100vh !important;
+    background-color: var(--vibe-bg) !important;
+}
+
+/* Remove o header que sobra no topo */
+.login #header { display: none !important; }
