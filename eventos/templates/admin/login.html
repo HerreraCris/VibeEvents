@@ -1,0 +1,13 @@
+{% extends "admin/login.html" %}
+{% load static %}
+
+{% block extrastyle %}
+    {{ block.super }}
+    <link rel="stylesheet" href="{% static 'css/admin_custom.css' %}">
+{% endblock %}
+
+{% block branding %}
+<div style="text-align: center; margin-bottom: 20px;">
+    <img src="{% static 'img/vibeevents-icon.png' %}" alt="VibeEvents" style="height: 60px; width: auto;">
+</div>
+{% endblock %}

@@ -16,6 +16,8 @@ ALLOWED_HOSTS = []
 # Application definition
 
 INSTALLED_APPS = [
+    'eventos',           # Seu app de eventos
+
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -24,8 +26,9 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
 
     'django.contrib.gis', # Habilita suporte a mapas/PostGIS
-    'leaflet',            # Biblioteca para mapas melhores no Admin
-    'eventos',            # Seu app de eventos
+    'leaflet',
+
+
 ]
 
 MIDDLEWARE = [
@@ -43,7 +46,7 @@ ROOT_URLCONF = 'vibeevents_core.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [],
+        'DIRS': [os.path.join(BASE_DIR, 'templates')],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
@@ -98,13 +101,9 @@ DATABASES = {
 # Permite que o cabeçalho Referer seja enviado para o OpenStreetMap
 SECURE_REFERRER_POLICY = "no-referrer-when-downgrade"
 
-# Configuração do Leaflet para o Admin abrir em Palmas/TO
 LEAFLET_CONFIG = {
     'DEFAULT_CENTER': (-10.18, -48.33),
     'DEFAULT_ZOOM': 13,
-    'PLUGINS': {
-        'forms': {
-            'auto-include': True,
-        }
-    }
+    'TILES': 'https://tiles.stadiamaps.com/tiles/alidade_smooth_dark/{z}/{x}/{y}{r}.png',
+    'ATTRIBUTION_PREFIX': 'VibeEvents',
 }
