@@ -1,17 +1,16 @@
-
 from django.contrib import admin
-from leaflet.admin import LeafletGeoAdmin
+from django.contrib.gis import admin as gis_admin 
 from .models import Evento
 
 @admin.register(Evento)
-class EventoAdmin(admin.GISModelAdmin):
-    # Organização por Seções (Fieldsets) como na imagem enviada
+class EventoAdmin(gis_admin.GISModelAdmin):
+    # Organização por Seções (Fieldsets)
     fieldsets = (
         ('Informações Básicas', {
             'fields': ('nome', 'categoria', 'link_externo')
         }),
         ('Data & Localização', {
-            'fields': ('data_evento', 'localizacao'),
+            'fields': ('data_evento', 'nome_local', 'localizacao'), # Adicionado nome_local aqui
         }),
         ('Descrição Detalhada', {
             'fields': ('descricao', 'is_beneficente'),
@@ -21,7 +20,6 @@ class EventoAdmin(admin.GISModelAdmin):
     list_display = ('nome', 'categoria', 'data_evento', 'is_beneficente')
     list_filter = ('categoria', 'is_beneficente')
     
-    # Injetando o CSS e JS customizado
     class Media:
         css = {
             'all': ('css/admin_custom.css',)
