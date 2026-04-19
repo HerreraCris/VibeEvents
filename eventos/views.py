@@ -7,8 +7,8 @@ from .forms import EventoCuradoriaForm
 import json
 
 def mapa_eventos(request):
-    # Busca todos os eventos cadastrados que estão aprovados
-    eventos = Evento.objects.filter(status='aprovado')
+    # Busca todos os eventos cadastrados
+    eventos = Evento.objects.all()
     
     # Serializa para GeoJSON incluindo o novo campo 'nome_local'
     eventos_geojson = serialize('geojson', eventos, geometry_field='localizacao', 
@@ -38,21 +38,3 @@ def cadastrar_evento_curadoria(request):
         form = EventoCuradoriaForm()
     
     return render(request, 'eventos/curadoria_cadastro.html', {'form': form})
-
-from .forms import EventoPublicoForm
-from django.contrib import messages
-
-def sugerir_evento(request):
-    if request.method == 'POST':
-        form = EventoPublicoForm(request.POST)
-        if form.is_valid():
-            evento = form.save(commit=False)
-            evento.status = 'pendente'  # 🔥 ESSENCIAL
-            evento.save()
-
-            messages.success(request, "Evento enviado para análise!")
-            return redirect('mapa_eventos')
-    else:
-        form = EventoPublicoForm()
-
-    return render(request, 'eventos/sugerir_evento.html', {'form': form})

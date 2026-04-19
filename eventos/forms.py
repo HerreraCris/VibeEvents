@@ -20,37 +20,3 @@ class EventoCuradoriaForm(forms.ModelForm):
                 'link_externo': forms.URLInput(attrs={'class': 'form-control bg-dark text-white border-secondary'}),
                 'descricao': forms.Textarea(attrs={'class': 'form-control bg-dark text-white border-secondary', 'rows': 3}),
             }
-
-class EventoPublicoForm(forms.ModelForm):
-    class Meta:
-        model = Evento
-        fields = [
-            'nome',
-            'categoria',
-            'data_evento',
-            'link_externo',
-            'localizacao',
-            'is_beneficente',
-            'descricao',
-            'nome_local'
-        ]
-        widgets = {
-            'localizacao': LeafletWidget(attrs={
-                'id': 'mapa-publico',
-                'style': 'height: 480px; width: 100%;',
-            }),
-            'nome': forms.TextInput(attrs={'class': 'form-control bg-dark text-white border-secondary'}),
-            'categoria': forms.Select(attrs={'class': 'form-select bg-dark text-white border-secondary'}),
-            'data_evento': forms.DateTimeInput(attrs={
-                'class': 'form-control bg-dark text-white border-secondary',
-                'type': 'datetime-local'
-            }),
-            'link_externo': forms.URLInput(attrs={'class': 'form-control bg-dark text-white border-secondary'}),
-            'descricao': forms.Textarea(attrs={
-                'class': 'form-control bg-dark text-white border-secondary',
-                'rows': 3
-            }),
-            'nome_local': forms.TextInput(attrs={
-                'class': 'form-control bg-dark text-white border-secondary'
-            }),
-        }
