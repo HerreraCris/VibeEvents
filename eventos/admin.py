@@ -1,16 +1,15 @@
 from django.contrib import admin
-from django.contrib.gis import admin as gis_admin 
+from leaflet.admin import LeafletGeoAdmin
 from .models import Evento
 
 @admin.register(Evento)
-class EventoAdmin(gis_admin.GISModelAdmin):
-    # Organização por Seções (Fieldsets)
+class EventoAdmin(LeafletGeoAdmin):
     fieldsets = (
         ('Informações Básicas', {
             'fields': ('nome', 'categoria', 'link_externo')
         }),
         ('Data & Localização', {
-            'fields': ('data_evento', 'nome_local', 'localizacao'), # Adicionado nome_local aqui
+            'fields': ('data_evento', 'nome_local', 'localizacao'),
         }),
         ('Descrição Detalhada', {
             'fields': ('descricao', 'is_beneficente'),
@@ -21,15 +20,10 @@ class EventoAdmin(gis_admin.GISModelAdmin):
     list_filter = ('categoria', 'is_beneficente')
     
     class Media:
-        css = {
-            'all': ('css/admin_custom.css',)
-        }
+        css = { 'all': ('css/admin_custom.css',) }
 
-    # Configuração do Mapa
-    gis_widget_kwargs = {
-        'attrs': {
-            'default_zoom': 13,
-            'default_lon': -48.33,
-            'default_lat': -10.18,
-        }
-    }
+    # US-EV-06: Ativa a busca por endereço também no mapa do Admin
+    def get_map_widget(self, db_field):
+        widget = super().get_map_widget(db_field)
+        widget.params['plugins'] = ['geocoder']
+        return widget
