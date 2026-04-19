@@ -35,16 +35,40 @@
     </style>
 </head>
 <body>
-
-
-    <nav class="navbar navbar-vibe d-flex align-items-center justify-content-between">
-        <div class="d-flex align-items-center">
-            <img src="{% static 'img/vibeevents-icon.png' %}" alt="Logo" style="height: 120px; width: auto" class="me-3">
+        {% if messages %}
+    <div class="toast-container position-fixed top-0 end-0 p-3">
+        {% for message in messages %}
+        <div class="toast show align-items-center text-bg-success border-0">
+            <div class="d-flex">
+                <div class="toast-body">
+                    {{ message }}
+                </div>
+            </div>
         </div>
-        <a href="{% url 'curadoria_novo' %}" class="btn btn-outline-light btn-sm rounded-pill">
-            <i class="bi bi-plus-circle me-1"></i> Painel de Curadoria
-        </a>
-    </nav>
+        {% endfor %}
+    </div>
+    {% endif %}
+
+
+        <nav class="navbar navbar-vibe d-flex align-items-center justify-content-between">
+            <div class="d-flex align-items-center">
+                <img src="{% static 'img/vibeevents-icon.png' %}" alt="Logo" style="height: 120px;">
+            </div>
+
+            <div class="d-flex gap-2">
+                
+                <!-- 🔥 BOTÃO PÚBLICO -->
+                <a href="{% url 'sugerir_evento' %}" class="btn btn-primary rounded-pill">
+                    <i class="bi bi-send me-1"></i> Sugerir Evento
+                </a>
+
+                <!-- 🔒 BOTÃO ADMIN -->
+                <a href="{% url 'curadoria_novo' %}" class="btn btn-outline-light btn-sm rounded-pill">
+                    <i class="bi bi-shield-lock me-1"></i> Curadoria
+                </a>
+
+            </div>
+        </nav>
 
     <div id="main-container">
         <aside id="sidebar">
@@ -131,6 +155,16 @@
             
             // Popula a lista pela primeira vez
             atualizarListaLateral('ALL', false);
+        });
+    </script>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const toasts = document.querySelectorAll('.toast');
+            if (toasts.length > 0) {
+                setTimeout(() => {
+                    toasts.forEach(t => t.remove());
+                }, 4000);
+            }
         });
     </script>
 </body>

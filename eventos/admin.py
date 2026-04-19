@@ -4,28 +4,30 @@ from .models import Evento
 
 @admin.register(Evento)
 class EventoAdmin(gis_admin.GISModelAdmin):
-    # Organização por Seções (Fieldsets)
+
     fieldsets = (
         ('Informações Básicas', {
             'fields': ('nome', 'categoria', 'link_externo')
         }),
         ('Data & Localização', {
-            'fields': ('data_evento', 'nome_local', 'localizacao'), # Adicionado nome_local aqui
+            'fields': ('data_evento', 'nome_local', 'localizacao'),
         }),
         ('Descrição Detalhada', {
             'fields': ('descricao', 'is_beneficente'),
         }),
+        ('Moderação', {  # 🔥 NOVO
+            'fields': ('status',),
+        }),
     )
 
-    list_display = ('nome', 'categoria', 'data_evento', 'is_beneficente')
-    list_filter = ('categoria', 'is_beneficente')
+    list_display = ('nome', 'categoria', 'data_evento', 'status', 'is_beneficente')  # 🔥 ADD status
+    list_filter = ('categoria', 'is_beneficente', 'status')  # 🔥 ADD status
     
     class Media:
         css = {
             'all': ('css/admin_custom.css',)
         }
 
-    # Configuração do Mapa
     gis_widget_kwargs = {
         'attrs': {
             'default_zoom': 13,
