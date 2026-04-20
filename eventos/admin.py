@@ -45,9 +45,17 @@ class EventoAdmin(LeafletGeoAdmin):
         }),
     )
 
-    list_display = ('nome', 'categoria', 'data_evento', 'is_beneficente')
-    list_filter = ('categoria', 'is_beneficente')
+    list_display = ('nome', 'categoria', 'data_evento', 'status', 'is_beneficente')
+    list_filter = ('status', 'categoria', 'is_beneficente', PeriodoFilter)
+    list_editable = ('status',) # Permite aprovar direto na listagem
+    search_fields = ('nome', 'descricao')
     
+    actions = ['marcar_como_publicado']    
+    @admin.action(description="🚀 Publicar eventos selecionados")
+    def marcar_como_publicado(self, request, queryset):
+        queryset.update(status='PUBL')
+
+
     class Media:
         css = { 'all': ('css/admin_custom.css',) }
 
