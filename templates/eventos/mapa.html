@@ -1,3 +1,4 @@
+
 {% load static %}
 <!DOCTYPE html>
 <html lang="pt-br">
@@ -8,45 +9,42 @@
     
     <link rel="stylesheet" href="{% static 'bootstrap-5.3.8/css/bootstrap.min.css' %}">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
-    
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
-    
     <link rel="stylesheet" href="https://unpkg.com/leaflet-control-geocoder/dist/Control.Geocoder.css" />
-    
     <link rel="stylesheet" href="{% static 'css/mapa.css' %}" />
 
     <style>
-        /* Layout de Tela Inicial */
-        #main-container { 
-            display: flex; 
-            height: calc(100vh - 120px); 
-            overflow: hidden; 
-        }
+        #main-container { display: flex; height: calc(100vh - 110px); overflow: hidden; }
         #sidebar { width: 350px; background: #121826; border-right: 1px solid #222b3e; padding: 20px; z-index: 1000; overflow-y: auto; }
         #map { flex-grow: 1; height: 100%; }
         
-        .navbar-vibe { 
-            background: #0b0f19; 
-            border-bottom: 1px solid #222b3e; 
-            padding: 10px 25px; 
-            height: 110px; 
-        }
-        .filter-badge { cursor: pointer; transition: 0.3s; border: 1px solid #222b3e; padding: 8px 15px; border-radius: 20px; font-size: 0.85rem; margin-bottom: 10px; display: inline-block; }
+        .navbar-vibe { background: #0b0f19; border-bottom: 1px solid #222b3e; padding: 10px 25px; height: 110px; }
+        
+        .filter-badge { cursor: pointer; transition: 0.3s; border: 1px solid #222b3e; padding: 8px 15px; border-radius: 20px; font-size: 0.85rem; margin-bottom: 10px; display: inline-block; text-decoration: none; color: white; }
         .filter-badge:hover, .filter-badge.active { background: #7DACFD; color: #0b0f19; border-color: #7DACFD; }
 
-        /* Ajuste visual para a Lupa não sumir no tema escuro */
-        .leaflet-control-geocoder {
-            background: #fff !important;
-            color: #000 !important;
-            border-radius: 4px;
+        .btn-periodo {
+            background: #161e2e;
+            color: #7DACFD;
+            border: 1px solid #7DACFD;
+            padding: 6px 12px;
+            border-radius: 20px;
+            text-decoration: none;
+            font-size: 0.8rem;
+            font-weight: bold;
+            margin-right: 5px;
+            display: inline-block;
+            transition: 0.3s;
         }
+        .btn-periodo:hover, .btn-periodo.active { background: #7DACFD; color: #101624; }
+        .letter-spacing-1 { letter-spacing: 1px; }
     </style>
 </head>
 <body>
 
     <nav class="navbar navbar-vibe d-flex align-items-center justify-content-between">
         <div class="d-flex align-items-center">
-            <img src="{% static 'img/vibeevents-icon.png' %}" alt="Logo" style="height: 120px; width: auto" class="me-3">
+            <img src="{% static 'img/vibeevents-icon.png' %}" alt="Logo" style="height: 100px; width: auto" class="me-3">
         </div>
         <a href="{% url 'curadoria_novo' %}" class="btn btn-outline-light btn-sm rounded-pill">
             <i class="bi bi-plus-circle me-1"></i> Painel de Curadoria
@@ -55,10 +53,18 @@
 
     <div id="main-container">
         <aside id="sidebar">
+            <h6 class="text-muted text-uppercase small letter-spacing-1 mb-3">Quando?</h6>
+            <div class="mb-4">
+                <a href="?" class="btn-periodo {% if not periodo_atual %}active{% endif %}">Todos</a>
+                <a href="?periodo=hoje" class="btn-periodo {% if periodo_atual == 'hoje' %}active{% endif %}">Hoje</a>
+                <a href="?periodo=fds" class="btn-periodo {% if periodo_atual == 'fds' %}active{% endif %}">FDS</a>
+                <a href="?periodo=7dias" class="btn-periodo {% if periodo_atual == '7dias' %}active{% endif %}">7 Dias</a>
+            </div>
+
             <h6 class="text-muted text-uppercase small letter-spacing-1 mb-3">Impacto Social</h6>
             <div class="form-check form-switch mb-4">
                 <input class="form-check-input" type="checkbox" id="filter-solidario" onchange="filterChange()">
-                <label class="form-check-label text-white" for="filter-solidario">Apenas Eventos Solidários ❤️</label>
+                <label class="form-check-label text-white" for="filter-solidario">Apenas Solidários ❤️</label>
             </div>
 
             <h6 class="text-muted text-uppercase small letter-spacing-1 mb-3">Explorar Categorias</h6>
@@ -75,6 +81,7 @@
             <h6 class="text-muted text-uppercase small letter-spacing-1 mb-3">Eventos Disponíveis</h6>
             <div id="event-list-container"> </div>
         </aside>
+
         <div id="map"></div>
     </div>
 
@@ -82,7 +89,6 @@
 
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
     <script src="https://unpkg.com/leaflet-control-geocoder/dist/Control.Geocoder.js"></script>
-    
     <script src="{% static 'js/mapa.js' %}"></script>
     
     <script>
@@ -101,16 +107,25 @@
 
             const listContainer = document.getElementById('event-list-container');
             if (listContainer) {
-                listContainer.innerHTML = filtrados.map(ev => `
-                    <div class="card mb-3 bg-dark border-secondary shadow-sm">
-                        <div class="card-body p-3">
-                            <h6 class="mb-1 text-white">${ev.nome}</h6>
-                            <p class="text-muted small mb-2">${ev.nome_local}</p>
-                            <span class="badge bg-primary rounded-pill" style="font-size: 10px;">${ev.categoria}</span>
-                            ${ev.is_beneficente ? '<span class="ms-2">❤️</span>' : ''}
+                if (filtrados.length === 0) {
+                    listContainer.innerHTML = '<p class="text-muted small">Nenhum evento para esta categoria.</p>';
+                } else {
+                    listContainer.innerHTML = filtrados.map(ev => `
+                        <div class="card mb-3 bg-dark border-secondary shadow-sm">
+                            <div class="card-body p-3">
+                                <h6 class="mb-1 text-white">${ev.nome}</h6>
+                                <p class="text-muted small mb-1">${ev.nome_local}</p>
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <span class="badge bg-primary rounded-pill" style="font-size: 10px;">${ev.categoria}</span>
+                                    <span class="text-muted small" style="font-size: 10px;">
+                                        ${new Date(ev.data_evento).toLocaleDateString('pt-BR')}
+                                    </span>
+                                </div>
+                                ${ev.is_beneficente ? '<div class="mt-2 text-warning small">❤ Evento Solidário</div>' : ''}
+                            </div>
                         </div>
-                    </div>
-                `).join('') || '<p class="text-muted small">Nenhum evento encontrado.</p>';
+                    `).join('');
+                }
             }
         }
 
@@ -133,6 +148,21 @@
             const dataEl = document.getElementById('eventos-data');
             if (dataEl) {
                 const data = JSON.parse(dataEl.textContent);
+
+                // Verificação de dados vazios (Feedback Profissional)
+                if (data.length === 0) {
+                    console.log("Nenhum evento encontrado para este período.");
+                    const listContainer = document.getElementById('event-list-container');
+                    if (listContainer) {
+                        listContainer.innerHTML = `
+                            <div class="alert alert-info bg-dark text-info border-info small">
+                                <i class="bi bi-info-circle me-2"></i>
+                                Nenhum evento encontrado para este filtro em Palmas.
+                            </div>
+                        `;
+                    }
+                }
+
                 if (typeof initMap === 'function') {
                     initMap('map', data);
                 }

@@ -1,6 +1,35 @@
 from django.contrib import admin
 from leaflet.admin import LeafletGeoAdmin
 from .models import Evento
+from django.utils import timezone
+from datetime import timedelta
+
+
+class PeriodoFilter(admin.SimpleListFilter):
+    title = 'Período do Evento'
+    parameter_name = 'periodo'
+
+    def lookups(self, request, model_admin):
+        return (
+            ('hoje', 'Hoje'),
+            ('fds', 'Este Final de Semana'),
+            ('7dias', 'Próximos 7 Dias'),
+            ('mes', 'Este Mês'),
+        )
+
+    def queryset(self, request, queryset):
+        hoje = timezone.now().date()
+        if self.value() == 'hoje':
+            return queryset.filter(data_evento__date=hoje)
+        if self.value() == 'fds':
+            # Calcula próxima sexta e domingo
+            sexta = hoje + timedelta(days=(4 - hoje.weekday()) % 7)
+            domingo = sexta + timedelta(days=2)
+            return queryset.filter(data_evento__date__range=[sexta, domingo])
+        if self.value() == '7dias':
+            return queryset.filter(data_evento__date__range=[hoje, hoje + timedelta(days=7)])
+        if self.value() == 'mes':
+            return queryset.filter(data_evento__month=hoje.month, data_evento__year=hoje.year)
 
 @admin.register(Evento)
 class EventoAdmin(LeafletGeoAdmin):
