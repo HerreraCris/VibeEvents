@@ -8,54 +8,87 @@
     
     <link rel="stylesheet" href="{% static 'bootstrap-5.3.8/css/bootstrap.min.css' %}">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
-    
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <link rel="stylesheet" href="https://unpkg.com/leaflet-control-geocoder/dist/Control.Geocoder.css" />
     <link rel="stylesheet" href="{% static 'css/mapa.css' %}" />
 
     <style>
-        /* Layout de Tela Inicial */
-        #main-container { 
-            display: flex; 
-            /* AJUSTE: Mudar de 70px para 120px */
-            height: calc(100vh - 120px); 
-            overflow: hidden; 
-        }
+        #main-container { display: flex; height: calc(100vh - 110px); overflow: hidden; }
         #sidebar { width: 350px; background: #121826; border-right: 1px solid #222b3e; padding: 20px; z-index: 1000; overflow-y: auto; }
         #map { flex-grow: 1; height: 100%; }
         
-        .navbar-vibe { 
-            background: #0b0f19; 
-            border-bottom: 1px solid #222b3e; 
-            padding: 10px 25px; 
-            /* AJUSTE: Mudar de 70px para 120px */
-            height: 110px; 
-        }
-        .filter-badge { cursor: pointer; transition: 0.3s; border: 1px solid #222b3e; padding: 8px 15px; border-radius: 20px; font-size: 0.85rem; margin-bottom: 10px; display: inline-block; }
+        .navbar-vibe { background: #0b0f19; border-bottom: 1px solid #222b3e; padding: 10px 25px; height: 110px; }
+        
+        .filter-badge { cursor: pointer; transition: 0.3s; border: 1px solid #222b3e; padding: 8px 15px; border-radius: 20px; font-size: 0.85rem; margin-bottom: 10px; display: inline-block; text-decoration: none; color: white; }
         .filter-badge:hover, .filter-badge.active { background: #7DACFD; color: #0b0f19; border-color: #7DACFD; }
+
+        .btn-periodo {
+            background: #161e2e;
+            color: #7DACFD;
+            border: 1px solid #7DACFD;
+            padding: 6px 12px;
+            border-radius: 20px;
+            text-decoration: none;
+            font-size: 0.8rem;
+            font-weight: bold;
+            margin-right: 5px;
+            display: inline-block;
+            transition: 0.3s;
+        }
+        .btn-periodo:hover, .btn-periodo.active { background: #7DACFD; color: #101624; }
+        .btn-periodo.fav-active { background: #ff4757; color: white; border-color: #ff4757; }
+
+        .letter-spacing-1 { letter-spacing: 1px; }
+
+        .btn-favorito {
+            background: none;
+            border: none;
+            color: #94a3b8;
+            font-size: 1.1rem;
+            cursor: pointer;
+            transition: 0.2s;
+            padding: 0;
+        }
+        .btn-favorito.is-fav { color: #ff4757 !important; }
     </style>
 </head>
 <body>
 
-
     <nav class="navbar navbar-vibe d-flex align-items-center justify-content-between">
         <div class="d-flex align-items-center">
-            <img src="{% static 'img/vibeevents-icon.png' %}" alt="Logo" style="height: 120px; width: auto" class="me-3">
+            <img src="{% static 'img/vibeevents-icon.png' %}" alt="Logo" style="height: 100px; width: auto" class="me-3">
         </div>
-        <a href="{% url 'curadoria_novo' %}" class="btn btn-outline-light btn-sm rounded-pill">
-            <i class="bi bi-plus-circle me-1"></i> Painel de Curadoria
+        <a href="{% url 'sugerir_evento' %}" class="btn btn-outline-light btn-sm rounded-pill">
+            <i class="bi bi-plus-circle me-1"></i> Sugerir Evento
         </a>
     </nav>
 
     <div id="main-container">
         <aside id="sidebar">
+            <h6 class="text-muted text-uppercase small letter-spacing-1 mb-3">Quando?</h6>
+            <div class="mb-4">
+                <a href="?" class="btn-periodo {% if not periodo_atual %}active{% endif %}">Todos</a>
+                <a href="?periodo=hoje" class="btn-periodo {% if periodo_atual == 'hoje' %}active{% endif %}">Hoje</a>
+                <a href="?periodo=fds" class="btn-periodo {% if periodo_atual == 'fds' %}active{% endif %}">FDS</a>
+                <a href="?periodo=7dias" class="btn-periodo {% if periodo_atual == '7dias' %}active{% endif %}">7 Dias</a>
+            </div>
+
+            <h6 class="text-muted text-uppercase small letter-spacing-1 mb-3">Meus Eventos</h6>
+            <div class="mb-4">
+                <button id="btn-show-favs" class="btn-periodo" onclick="toggleFiltroFavoritos()">
+                    <i class="bi bi-heart-fill me-1"></i> Meus Favoritos
+                </button>
+            </div>
+
             <h6 class="text-muted text-uppercase small letter-spacing-1 mb-3">Impacto Social</h6>
             <div class="form-check form-switch mb-4">
                 <input class="form-check-input" type="checkbox" id="filter-solidario" onchange="filterChange()">
-                <label class="form-check-label text-white" for="filter-solidario">Apenas Eventos Solidários ❤️</label>
+                <label class="form-check-label text-white" for="filter-solidario">Apenas Solidários ❤️</label>
             </div>
 
             <h6 class="text-muted text-uppercase small letter-spacing-1 mb-3">Explorar Categorias</h6>
-            <div class="mb-4"> <div class="filter-badge active" data-cat="ALL" onclick="updateCategory(this)">Todos</div>
+            <div class="mb-4"> 
+                <div class="filter-badge active" data-cat="ALL" onclick="updateCategory(this)">Todos</div>
                 <div class="filter-badge" data-cat="MUSI" onclick="updateCategory(this)"><i class="bi bi-music-note"></i> Música</div>
                 <div class="filter-badge" data-cat="CULT" onclick="updateCategory(this)"><i class="bi bi-palette"></i> Cultura</div>
                 <div class="filter-badge" data-cat="ESPO" onclick="updateCategory(this)"><i class="bi bi-trophy"></i> Esporte</div>
@@ -67,54 +100,90 @@
             <h6 class="text-muted text-uppercase small letter-spacing-1 mb-3">Eventos Disponíveis</h6>
             <div id="event-list-container"> </div>
         </aside>
+
         <div id="map"></div>
     </div>
 
     {{ eventos_js|json_script:"eventos-data" }}
 
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-    <script src="{% static 'js/mapa.js' %}"></script>
-    
+    <script src="https://unpkg.com/leaflet-control-geocoder/dist/Control.Geocoder.js"></script>
+    <script src="{% static 'js/mapa.js' %}?v={% now 'U' %}"></script>
     <script>
-        // Variável global para controle de estado
-        let currentCategory = 'ALL';
+        window.getFavoritos = window.getFavoritos || function() {
+            return JSON.parse(localStorage.getItem('vibe_favs')) || [];
+        };
 
-        // 1. Função para atualizar a lista lateral (A QUE ESTAVA FALTANDO)
+        let currentCategory = 'ALL';
+        let apenasFavoritos = false;
+
+        function toggleFavorito(eventoId) {
+            // Chama a função única do mapa.js
+            if (typeof window.gerenciarFavoritoMapa === 'function') {
+                window.gerenciarFavoritoMapa(eventoId);
+            }
+        }
+        function toggleFiltroFavoritos() {
+            apenasFavoritos = !apenasFavoritos;
+            const btn = document.getElementById('btn-show-favs');
+            if (btn) btn.classList.toggle('fav-active', apenasFavoritos);
+            filterChange();
+        }
+
         function atualizarListaLateral(cat, solidario) {
-            const data = JSON.parse(document.getElementById('eventos-data').textContent);
+            const dataEl = document.getElementById('eventos-data');
+            if (!dataEl) return;
+            
+            const data = JSON.parse(dataEl.textContent);
+            // Agora o getFavoritos já está garantido pela "Rede de Segurança" acima
+            const favs = window.getFavoritos();
+
             const filtrados = data.filter(ev => {
                 const bateCat = (cat === 'ALL' || ev.categoria === cat);
                 const bateSol = (!solidario || ev.is_beneficente);
-                return bateCat && bateSol;
+                const bateFav = (!apenasFavoritos || favs.includes(ev.id.toString()));
+                return bateCat && bateSol && bateFav;
             });
 
             const listContainer = document.getElementById('event-list-container');
             if (listContainer) {
-                listContainer.innerHTML = filtrados.map(ev => `
-                    <div class="card mb-3 bg-dark border-secondary">
-                        <div class="card-body p-3">
-                            <h6 class="mb-1 text-white">${ev.nome}</h6>
-                            <p class="text-muted small mb-2">${ev.nome_local}</p>
-                            <span class="badge bg-primary rounded-pill" style="font-size: 10px;">${ev.categoria}</span>
-                            ${ev.is_beneficente ? '<span class="ms-2">❤️</span>' : ''}
-                        </div>
-                    </div>
-                `).join('') || '<p class="text-muted small">Nenhum evento encontrado.</p>';
+                if (filtrados.length === 0) {
+                    listContainer.innerHTML = '<p class="text-muted small p-3">Nenhum evento encontrado.</p>';
+                } else {
+                    listContainer.innerHTML = filtrados.map(ev => {
+                        const isFav = favs.includes(ev.id.toString());
+                        return `
+                        <div class="card mb-3 bg-dark border-secondary shadow-sm">
+                            <div class="card-body p-3">
+                                <div class="d-flex justify-content-between align-items-start">
+                                    <h6 class="mb-1 text-white">${ev.nome}</h6>
+                                    <button class="btn-favorito ${isFav ? 'is-fav' : ''}" onclick="toggleFavorito('${ev.id}')">
+                                        <i class="bi ${isFav ? 'bi-heart-fill' : 'bi-heart'}"></i>
+                                    </button>
+                                </div>
+                                <p class="text-muted small mb-1">${ev.nome_local}</p>
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <span class="badge bg-primary rounded-pill" style="font-size: 10px;">${ev.categoria}</span>
+                                    <span class="text-muted small" style="font-size: 10px;">
+                                        ${new Date(ev.data_evento).toLocaleDateString('pt-BR')}
+                                    </span>
+                                </div>
+                                ${ev.is_beneficente ? '<div class="mt-2 text-warning small">❤ Evento Solidário</div>' : ''}
+                            </div>
+                        </div>`;
+                    }).join('');
+                }
             }
         }
 
-        // 2. Função disparada quando muda o filtro (Switch ou Categoria)
         function filterChange() {
             const isSolidario = document.getElementById('filter-solidario').checked;
-            
-            // Chama a função global definida no mapa.js
             if (window.aplicarFiltros) {
-                window.aplicarFiltros(currentCategory, isSolidario);
+                window.aplicarFiltros(currentCategory, isSolidario, apenasFavoritos);
             }
             atualizarListaLateral(currentCategory, isSolidario);
         }
 
-        // 3. Função para trocar categoria
         function updateCategory(element) {
             document.querySelectorAll('.filter-badge').forEach(el => el.classList.remove('active'));
             element.classList.add('active');
@@ -122,43 +191,16 @@
             filterChange();
         }
 
-        // 4. Inicialização única ao carregar a página
         document.addEventListener('DOMContentLoaded', () => {
-            const data = JSON.parse(document.getElementById('eventos-data').textContent);
-            
-            // Inicializa o mapa
-            initMap('map', data);
-            
-            // Popula a lista pela primeira vez
-            atualizarListaLateral('ALL', false);
+            const dataEl = document.getElementById('eventos-data');
+            if (dataEl) {
+                const data = JSON.parse(dataEl.textContent);
+                if (typeof initMap === 'function') {
+                    initMap('map', data);
+                }
+                atualizarListaLateral('ALL', false);
+            }
         });
     </script>
 </body>
 </html>
-
-<script>
-    // Defina as funções globais fora do DOMContentLoaded
-    function filterChange() {
-        const isSolidario = document.getElementById('filter-solidario').checked;
-        const currentCategory = document.querySelector('.filter-badge.active').getAttribute('data-cat');
-        
-        if (window.aplicarFiltros) {
-            window.aplicarFiltros(currentCategory, isSolidario);
-        }
-        atualizarListaLateral(currentCategory, isSolidario);
-    }
-
-    // Chame o initMap apenas uma vez aqui
-    document.addEventListener('DOMContentLoaded', () => {
-        const data = JSON.parse(document.getElementById('eventos-data').textContent);
-        
-        // Verifica se os elementos existem antes de rodar
-        if (document.getElementById('map')) {
-            initMap('map', data);
-        }
-        
-        if (document.getElementById('event-list')) {
-            atualizarListaLateral('ALL', false);
-        }
-    });
-</script>

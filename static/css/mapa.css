@@ -107,3 +107,24 @@ h6.text-muted {
     background-color: #93b9ff; /* [cite: 29, 72] */
     box-shadow: 0 0 15px rgba(125, 172, 253, 0.4);
 }
+
+/* Estilo do botão de favorito */
+.btn-favorito {
+    background: none;
+    border: none;
+    color: #94a3b8; /* Cor neutra */
+    font-size: 1.2rem;
+    cursor: pointer;
+    transition: 0.3s;
+    padding: 0;
+}
+
+.btn-favorito.is-fav {
+    color: #ff4757; /* Cor de destaque (Vermelho Vibe) */
+}
+
+/* Botão de filtro de favoritos na sidebar */
+.btn-periodo.fav-active {
+    border-color: #ff4757;
+    color: #ff4757;
+}
