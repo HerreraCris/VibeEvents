@@ -118,3 +118,26 @@ body.login {
 
 /* Remove o header que sobra no topo */
 .login #header { display: none !important; }
+
+
+/* static/css/admin_custom.css */
+
+/* Destaca eventos pendentes na lista para o moderador não esquecer */
+.field-status_colorido span {
+    text-transform: uppercase;
+    font-size: 0.75rem;
+}
+
+/* Estilo para as linhas selecionadas */
+.selected {
+    background-color: rgba(125, 172, 253, 0.1) !important;
+}
+
+/* Melhora a visibilidade do select de status na lista */
+.field-status select {
+    background: #161e2e !important;
+    border: 1px solid #222b3e !important;
+    color: #7DACFD !important;
+    font-weight: bold;
+    padding: 2px !important;
+}
