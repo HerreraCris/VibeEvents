@@ -9,6 +9,7 @@ DEBUG = config('DEBUG', default=False, cast=bool)
 ALLOWED_HOSTS = []
 
 INSTALLED_APPS = [
+    'rest_framework',
     'eventos',
     'django.contrib.admin',
     'django.contrib.auth',
