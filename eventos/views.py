@@ -6,6 +6,8 @@ from datetime import timedelta
 from .models import Evento
 from .forms import EventoCuradoriaForm
 import json
+from rest_framework import generics
+from .serializers import EventoSerializer
 
 def mapa_eventos(request):
     eventos = Evento.objects.filter(status='PUBL')
@@ -71,3 +73,11 @@ def sugerir_evento_publico(request):
     
 def sugestao_sucesso(request):
     return render(request, 'eventos/sugestao_sucesso.html')
+
+
+class EventoListAPIView(generics.ListAPIView):
+    """
+    Retorna a lista de todos os eventos ativos e publicados.
+    """
+    queryset = Evento.objects.filter(status='PUBL').order_by('data_evento')
+    serializer_class = EventoSerializer
