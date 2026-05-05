@@ -101,7 +101,14 @@
             <div id="event-list-container"> </div>
         </aside>
 
-        <div id="map"></div>
+        <div id="map">
+            <button onclick="window.localizarUsuario()" 
+                class="btn btn-light shadow-sm" 
+                title="Minha Localização"
+                style="position: absolute; bottom: 20px; right: 20px; z-index: 1000; border-radius: 50%; width: 50px; height: 50px; display: flex; align-items: center; justify-content: center;">
+                <i class="bi bi-crosshair" style="font-size: 1.5rem; color: #007bff;"></i>
+            </button>
+        </div>
     </div>
 
     {{ eventos_js|json_script:"eventos-data" }}
