@@ -1,5 +1,6 @@
 let allMarkers = []; 
 let leafletMap;      
+let userMarker;
 
 // --- SISTEMA GLOBAL DE FAVORITOS ---
 window.getFavoritos = () => JSON.parse(localStorage.getItem('vibe_favs')) || [];
@@ -28,10 +29,31 @@ const initMap = (containerId, eventosData) => {
 
     leafletMap = L.map(containerId).setView([-10.18, -48.33], 13); 
     
-    L.tileLayer('https://tiles.stadiamaps.com/tiles/alidade_smooth_dark/{z}/{x}/{y}{r}.png', { 
-        maxZoom: 20, 
-        attribution: '© Stadia Maps' 
-    }).addTo(leafletMap); 
+// Substituindo o bloco do Stadia Maps pelo o do OpenStreetMap
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        maxZoom: 19,
+        attribution: '© OpenStreetMap contributors'
+    }).addTo(leafletMap);
+
+    // --- CONFIGURAÇÃO DE EVENTOS DE LOCALIZAÇÃO (GPS) ---
+    leafletMap.on('locationfound', (e) => {
+        if (userMarker) {
+            leafletMap.removeLayer(userMarker);
+        }
+
+        const userIcon = L.divIcon({
+            className: 'user-location-marker',
+            iconSize: [15, 15]
+        });
+
+        userMarker = L.marker(e.latlng, { icon: userIcon }).addTo(leafletMap)
+            .bindPopup("Você está aqui!").openPopup();
+    });
+
+    leafletMap.on('locationerror', (e) => {
+        alert("Não foi possível acessar sua localização. Verifique as permissões do navegador.");
+        console.log("Erro de GPS:", e.message);
+    });
 
     try {
         L.Control.geocoder({
@@ -63,7 +85,6 @@ const initMap = (containerId, eventosData) => {
             marker.eventoData = evento; 
             const addressId = `addr-${Math.random().toString(36).substr(2, 9)}`; 
 
-            // Função para gerar o HTML dinâmico do Popup (Garante que o coração atualize ao abrir)
             const getPopupContent = () => {
                 const favs = window.getFavoritos();
                 const isFav = favs.includes(evento.id.toString());
@@ -72,7 +93,7 @@ const initMap = (containerId, eventosData) => {
                     <div style="display: flex; justify-content: space-between; align-items: flex-start;">
                         <h5 style="margin: 0; font-weight: bold; color: #0b0f19;">${evento.nome}</h5>
                         <button class="btn-favorito ${isFav ? 'is-fav' : ''}" 
-                                onclick="window.toggleFavorito('${evento.id}')" 
+                                onclick="window.gerenciarFavoritoMapa('${evento.id}')" 
                                 style="border: none; background: none; padding: 0; cursor: pointer;">
                             <i class="bi ${isFav ? 'bi-heart-fill' : 'bi-heart'}" 
                                style="font-size: 1.2rem; color: ${isFav ? '#ff4757' : '#94a3b8'};"></i>
@@ -95,7 +116,6 @@ const initMap = (containerId, eventosData) => {
             marker.bindPopup(getPopupContent, { maxWidth: 300 });
 
             marker.on('popupopen', function() {
-                // Atualiza o conteúdo do popup toda vez que abre para pegar o estado real do favorito
                 marker.setPopupContent(getPopupContent());
                 
                 fetch(`https://nominatim.openstreetmap.org/reverse?format=jsonv2&lat=${coords[1]}&lon=${coords[0]}`) 
@@ -127,5 +147,18 @@ window.aplicarFiltros = (categoriaSelecionada, apenasSolidarios, apenasFavoritos
         } else {
             if (leafletMap.hasLayer(marker)) leafletMap.removeLayer(marker);
         }
+    });
+};
+
+// Função para encontrar o usuário
+window.localizarUsuario = () => {
+    if (!leafletMap) return;
+
+    leafletMap.locate({ 
+        setView: true, 
+        maxZoom: 16, 
+        enableHighAccuracy: true, 
+        timeout: 10000,          
+        maximumAge: 0            
     });
 };
