@@ -1,0 +1,149 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>VibeEvents | Personalize seu Vibe</title>
+    <link rel="stylesheet" href="{% static 'bootstrap-5.3.8/css/bootstrap.min.css' %}">
+    <style>
+        :root {
+            --bg-dark: #0b0f19;
+            --card-bg: #111827;
+            --border-color: #1f2937;
+            --text-muted: #9ca3af;
+            --primary-vibe: #3b82f6;
+        }
+
+        body {
+            background-color: var(--bg-dark);
+            color: white;
+            font-family: 'Inter', system-ui, sans-serif;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            margin: 0;
+        }
+
+        .card-onboarding {
+            background-color: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 24px;
+            width: 100%;
+            max-width: 420px;
+            padding: 40px;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+        }
+
+        .interest-item {
+            display: block;
+            position: relative;
+            margin-bottom: 12px;
+        }
+
+        /* Esconde o checkbox real */
+        .interest-item input {
+            position: absolute;
+            opacity: 0;
+            cursor: pointer;
+            height: 0;
+            width: 0;
+        }
+
+        /* Estilo do botão de interesse */
+        .interest-label {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 14px 20px;
+            background-color: #1f2937;
+            border: 2px solid transparent;
+            border-radius: 16px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            color: var(--text-muted);
+            font-weight: 500;
+        }
+
+        .interest-item:hover .interest-label {
+            background-color: #374151;
+            color: white;
+        }
+
+        /* Quando selecionado */
+        .interest-item input:checked + .interest-label {
+            background-color: rgba(59, 130, 246, 0.1);
+            border-color: var(--primary-vibe);
+            color: var(--primary-vibe);
+        }
+
+        /* Ícone de check invisível que aparece ao selecionar */
+        .interest-label::after {
+            content: '\F26E'; /* Ícone check do Bootstrap Icons se tiver, ou use emoji */
+            font-family: bootstrap-icons;
+            opacity: 0;
+            transition: 0.2s;
+        }
+
+        .interest-item input:checked + .interest-label::after {
+            content: '✓';
+            opacity: 1;
+        }
+
+        .btn-vibe {
+            background-color: var(--primary-vibe);
+            color: white;
+            border: none;
+            border-radius: 14px;
+            padding: 16px;
+            width: 100%;
+            font-weight: 700;
+            font-size: 1rem;
+            margin-top: 24px;
+            transition: 0.3s;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .btn-vibe:hover {
+            background-color: #2563eb;
+            transform: translateY(-2px);
+            box-shadow: 0 10px 15px -3px rgba(59, 130, 246, 0.4);
+        }
+
+        .logo-img { height: 40px; margin-bottom: 24px; }
+    </style>
+</head>
+<body>
+
+    <div class="card-onboarding">
+        <div class="text-center">
+            <img src="{% static 'img/vibeevents-icon.png' %}" class="logo-img" alt="VibeEvents">
+            <h2 class="fw-bold h4">O que você curte?</h2>
+            <p style="color: var(--text-muted); font-size: 0.9rem; margin-bottom: 32px;">
+                Selecione seus interesses para que o VibeEvents Palmas recomende o melhor para você.
+            </p>
+        </div>
+
+        <form method="post">
+            {% csrf_token %}
+            
+            <div class="interests-container">
+                {% for choice in form.interesses.field.choices %}
+                    <label class="interest-item">
+                        <input type="checkbox" name="interesses" value="{{ choice.0 }}" 
+                            {% if choice.0 in form.interesses.value %}checked{% endif %}>
+                        <span class="interest-label">
+                            {{ choice.1 }}
+                        </span>
+                    </label>
+                {% endfor %}
+            </div>
+
+            <button type="submit" class="btn-vibe">Explorar Palmas</button>
+        </form>
+    </div>
+
+</body>
+</html>
