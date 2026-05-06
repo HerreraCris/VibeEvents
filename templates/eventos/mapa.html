@@ -15,13 +15,17 @@
     <style>
         #main-container { display: flex; height: calc(100vh - 110px); overflow: hidden; }
         #sidebar { width: 350px; background: #121826; border-right: 1px solid #222b3e; padding: 20px; z-index: 1000; overflow-y: auto; }
-        #map { flex-grow: 1; height: 100%; }
+        #map { flex-grow: 1; height: 100%; position: relative; }
         
-        .navbar-vibe { background: #0b0f19; border-bottom: 1px solid #222b3e; padding: 10px 25px; height: 110px; }
-        
-        .filter-badge { cursor: pointer; transition: 0.3s; border: 1px solid #222b3e; padding: 8px 15px; border-radius: 20px; font-size: 0.85rem; margin-bottom: 10px; display: inline-block; text-decoration: none; color: white; }
+        .navbar-vibe { background: #0b0f19; border-bottom: 1px solid #222b3e; padding: 10px 25px; height: 110px; }        .filter-badge { cursor: pointer; transition: 0.3s; border: 1px solid #222b3e; padding: 8px 15px; border-radius: 20px; font-size: 0.85rem; margin-bottom: 10px; display: inline-block; text-decoration: none; color: white; }
         .filter-badge:hover, .filter-badge.active { background: #7DACFD; color: #0b0f19; border-color: #7DACFD; }
-
+ 
+        @media (max-width: 768px) {
+            .navbar-vibe { height: 80px; padding: 5px 15px; }
+            #main-container { height: calc(100vh - 80px); }
+            #sidebar { display: none; } /* Esconde a sidebar fixa no mobile */
+        }
+ 
         .btn-periodo {
             background: #161e2e;
             color: #7DACFD;
@@ -51,66 +55,49 @@
         }
         .btn-favorito.is-fav { color: #ff4757 !important; }
     </style>
+    <script src="{% static 'bootstrap-5.3.8/js/bootstrap.bundle.min.js' %}"></script>
 </head>
 <body>
 
     <nav class="navbar navbar-vibe d-flex align-items-center justify-content-between">
         <div class="d-flex align-items-center">
-            <img src="{% static 'img/vibeevents-icon.png' %}" alt="Logo" style="height: 100px; width: auto" class="me-3">
+            <!-- Botão Menu Mobile -->
+            <button class="btn btn-outline-light d-md-none me-3" type="button" data-bs-toggle="offcanvas" data-bs-target="#offcanvasSidebar">
+                <i class="bi bi-list" style="font-size: 1.5rem;"></i>
+            </button>
+            <img src="{% static 'img/vibeevents-icon.png' %}" alt="Logo" style="height: 70px; width: auto" class="me-3">
         </div>
-        <a href="{% url 'sugerir_evento' %}" class="btn btn-outline-light btn-sm rounded-pill">
+        <a href="{% url 'sugerir_evento' %}" class="btn btn-outline-light btn-sm rounded-pill d-none d-sm-block">
             <i class="bi bi-plus-circle me-1"></i> Sugerir Evento
         </a>
     </nav>
 
-    <div id="main-container">
-        <aside id="sidebar">
-            <h6 class="text-muted text-uppercase small letter-spacing-1 mb-3">Quando?</h6>
-            <div class="mb-4">
-                <a href="?" class="btn-periodo {% if not periodo_atual %}active{% endif %}">Todos</a>
-                <a href="?periodo=hoje" class="btn-periodo {% if periodo_atual == 'hoje' %}active{% endif %}">Hoje</a>
-                <a href="?periodo=fds" class="btn-periodo {% if periodo_atual == 'fds' %}active{% endif %}">FDS</a>
-                <a href="?periodo=7dias" class="btn-periodo {% if periodo_atual == '7dias' %}active{% endif %}">7 Dias</a>
-            </div>
-
-            <h6 class="text-muted text-uppercase small letter-spacing-1 mb-3">Meus Eventos</h6>
-            <div class="mb-4">
-                <button id="btn-show-favs" class="btn-periodo" onclick="toggleFiltroFavoritos()">
-                    <i class="bi bi-heart-fill me-1"></i> Meus Favoritos
-                </button>
-            </div>
-
-            <h6 class="text-muted text-uppercase small letter-spacing-1 mb-3">Impacto Social</h6>
-            <div class="form-check form-switch mb-4">
-                <input class="form-check-input" type="checkbox" id="filter-solidario" onchange="filterChange()">
-                <label class="form-check-label text-white" for="filter-solidario">Apenas Solidários ❤️</label>
-            </div>
-
-            <h6 class="text-muted text-uppercase small letter-spacing-1 mb-3">Explorar Categorias</h6>
-            <div class="mb-4"> 
-                <div class="filter-badge active" data-cat="ALL" onclick="updateCategory(this)">Todos</div>
-                <div class="filter-badge" data-cat="MUSI" onclick="updateCategory(this)"><i class="bi bi-music-note"></i> Música</div>
-                <div class="filter-badge" data-cat="CULT" onclick="updateCategory(this)"><i class="bi bi-palette"></i> Cultura</div>
-                <div class="filter-badge" data-cat="ESPO" onclick="updateCategory(this)"><i class="bi bi-trophy"></i> Esporte</div>
-                <div class="filter-badge" data-cat="EMPR" onclick="updateCategory(this)"><i class="bi bi-briefcase"></i> Empreendedorismo</div>
-            </div>
-
-            <hr class="border-secondary">
-            
-            <h6 class="text-muted text-uppercase small letter-spacing-1 mb-3">Eventos Disponíveis</h6>
-            <div id="event-list-container"> </div>
+<div id="main-container">
+        <!-- Sidebar Desktop -->
+        <aside id="sidebar" class="d-none d-md-block">
+            {% include 'eventos/sidebar_content.html' %}
         </aside>
+
+        <!-- Sidebar Mobile (Offcanvas) -->
+        <div class="offcanvas offcanvas-start bg-dark text-white" tabindex="-1" id="offcanvasSidebar" style="width: 300px;">
+            <div class="offcanvas-header border-bottom border-secondary">
+                <h5 class="offcanvas-title">Filtros e Eventos</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="offcanvas"></button>
+            </div>
+            <div class="offcanvas-body">
+                {% include 'eventos/sidebar_content.html' %}
+            </div>
+        </div>
 
         <div id="map">
             <button onclick="window.localizarUsuario()" 
                 class="btn btn-light shadow-sm" 
-                title="Minha Localização"
                 style="position: absolute; bottom: 20px; right: 20px; z-index: 1000; border-radius: 50%; width: 50px; height: 50px; display: flex; align-items: center; justify-content: center;">
                 <i class="bi bi-crosshair" style="font-size: 1.5rem; color: #007bff;"></i>
             </button>
         </div>
     </div>
-
+    
     {{ eventos_js|json_script:"eventos-data" }}
 
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>

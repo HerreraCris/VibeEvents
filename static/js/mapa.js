@@ -22,6 +22,24 @@ window.gerenciarFavoritoMapa = (eventoId) => {
     }
 };
 
+const obterInfoProximidade = (latlngEvento) => {
+    if (!userMarker) return ""; 
+
+    const userLatLng = userMarker.getLatLng();
+    const distanciaMetros = userLatLng.distanceTo(latlngEvento);
+    const distanciaKm = (distanciaMetros / 1000).toFixed(1);
+
+    // Estimativa baseada em 40km/h (média em Palmas)
+    const tempoMinutos = Math.round((distanciaKm / 40) * 60);
+
+    return `
+        <div style="margin-top: 8px; padding-top: 8px; border-top: 1px dashed #ccc; color: #007bff; font-weight: bold; font-size: 0.8rem;">
+            <i class="bi bi-geo-alt-fill"></i> ${distanciaKm} km de você <br>
+            <i class="bi bi-clock-history"></i> ~${tempoMinutos < 1 ? '1' : tempoMinutos} min de deslocamento
+        </div>
+    `;
+};
+
 const initMap = (containerId, eventosData) => {
     if (leafletMap !== undefined && leafletMap !== null) {
         leafletMap.remove();
@@ -88,35 +106,29 @@ const initMap = (containerId, eventosData) => {
             const getPopupContent = () => {
                 const favs = window.getFavoritos();
                 const isFav = favs.includes(evento.id.toString());
-                const infoProximidade = obterInfoProximidade([coords[1], coords[0]]);
+
+                const proximidadeHtml = obterInfoProximidade([coords[1], coords[0]]);
             return `
                 <div class="map-popup" style="color: #0b0f19; min-width: 220px;">
                     <div style="display: flex; justify-content: space-between; align-items: flex-start;">
-                        <h5 style="margin: 0; font-weight: bold; color: #0b0f19;">${evento.nome}</h5>
-                        <button class="btn-favorito ${isFav ? 'is-fav' : ''}" 
-                                onclick="window.gerenciarFavoritoMapa('${evento.id}')" 
-                                style="border: none; background: none; padding: 0; cursor: pointer;">
-                            <i class="bi ${isFav ? 'bi-heart-fill' : 'bi-heart'}" 
-                            style="font-size: 1.2rem; color: ${isFav ? '#ff4757' : '#94a3b8'};"></i>
+                        <h5 style="margin: 0; font-weight: bold;">${evento.nome}</h5>
+                        <button class="btn-favorito ${isFav ? 'is-fav' : ''}" onclick="window.gerenciarFavoritoMapa('${evento.id}')">
+                            <i class="bi ${isFav ? 'bi-heart-fill' : 'bi-heart'}"></i>
                         </button>
                     </div>
                     <div style="margin: 8px 0 5px; font-size: 0.9rem;">
-                        <span>🗓️</span> <b>${new Date(evento.data_evento).toLocaleDateString('pt-BR')}</b>
+                        🗓️ <b>${new Date(evento.data_evento).toLocaleDateString('pt-BR')}</b>
                     </div>
                     
-                    <!-- EXIBIÇÃO DA DISTÂNCIA -->
-                    ${infoProximidade}
+                    ${proximidadeHtml}
 
                     <p style="font-size: 0.75rem; color: #666; border-top: 1px solid #eee; padding-top: 8px; margin-top: 5px;">
-                        <b>Endereço:</b><br><span id="${addressId}">Carregando endereço...</span>
+                        <b>Endereço:</b><br><span id="${addressId}">Carregando...</span>
                     </p>
-                    <button class="btn btn-sm w-100 mt-2" 
-                            style="background-color: #7DACFD; color: #0b0f19; font-weight: bold; border-radius: 20px;" 
-                            onclick="window.open('${evento.link_externo}', '_blank')">
-                        GARANTIR INGRESSO
-                    </button> 
+                    <!-- ... botão ingresso ... -->
                 </div>`;
-            };            marker.bindPopup(getPopupContent, { maxWidth: 300 });
+            };
+            marker.bindPopup(getPopupContent, { maxWidth: 300 });
 
             marker.on('popupopen', function() {
                 marker.setPopupContent(getPopupContent());
@@ -166,21 +178,3 @@ window.localizarUsuario = () => {
     });
 };
 
-// Função para calcular distância e tempo estimado
-const obterInfoProximidade = (latlngEvento) => {
-    if (!userMarker) return ""; // Retorna vazio se o GPS não estiver ativo
-
-    const userLatLng = userMarker.getLatLng();
-    const distanciaMetros = userLatLng.distanceTo(latlngEvento);
-    const distanciaKm = (distanciaMetros / 1000).toFixed(1);
-
-    // Estimativa baseada em 40km/h (média urbana em Palmas)
-    const tempoMinutos = Math.round((distanciaKm / 40) * 60);
-
-    return `
-        <div style="margin-top: 8px; padding-top: 8px; border-top: 1px dashed #ccc; color: #007bff; font-weight: bold; font-size: 0.8rem;">
-            <i class="bi bi-geo-alt-fill"></i> ${distanciaKm} km de você <br>
-            <i class="bi bi-clock-history"></i> ~${tempoMinutos < 1 ? '1' : tempoMinutos} min de deslocamento
-        </div>
-    `;
-};
