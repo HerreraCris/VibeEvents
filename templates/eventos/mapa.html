@@ -100,6 +100,10 @@
     
     {{ eventos_js|json_script:"eventos-data" }}
 
+
+<script>
+    window.VIBE_INTERESSES = {{ interesses_usuario|safe|default:"[]" }};
+</script>
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
     <script src="https://unpkg.com/leaflet-control-geocoder/dist/Control.Geocoder.js"></script>
     <script src="{% static 'js/mapa.js' %}?v={% now 'U' %}"></script>
@@ -170,13 +174,15 @@
             }
         }
 
-        function filterChange() {
-            const isSolidario = document.getElementById('filter-solidario').checked;
-            if (window.aplicarFiltros) {
-                window.aplicarFiltros(currentCategory, isSolidario, apenasFavoritos);
-            }
-            atualizarListaLateral(currentCategory, isSolidario);
+    function filterChange() {
+        const switchSolidario = document.querySelector('#filter-solidario:checked');
+        const isSolidario = switchSolidario !== null;
+        
+        if (window.aplicarFiltros) {
+            window.aplicarFiltros(currentCategory, isSolidario, apenasFavoritos);
         }
+        atualizarListaLateral(currentCategory, isSolidario);
+    }
 
         function updateCategory(element) {
             document.querySelectorAll('.filter-badge').forEach(el => el.classList.remove('active'));

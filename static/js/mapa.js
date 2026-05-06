@@ -100,8 +100,17 @@ const initMap = (containerId, eventosData) => {
             const markerIcon = icons[evento.categoria] || icons['CULT']; 
             const marker = L.marker([coords[1], coords[0]], { icon: markerIcon }); 
 
-            marker.eventoData = evento; 
             const addressId = `addr-${Math.random().toString(36).substr(2, 9)}`; 
+            // LÓGICA DE RECOMENDAÇÃO PERSONALIZADA
+            const interesses = window.VIBE_INTERESSES || [];
+            if (interesses.length > 0) {
+                if (!interesses.includes(evento.categoria)) {
+                    marker.setOpacity(0.4); // Esmaece o que não é interesse
+                } else {
+                    marker.setZIndexOffset(1000); // Traz os favoritos para a frente
+                }
+            }
+            marker.eventoData = evento; 
 
             const getPopupContent = () => {
                 const favs = window.getFavoritos();
