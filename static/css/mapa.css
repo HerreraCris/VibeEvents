@@ -147,3 +147,26 @@ h6.text-muted {
     70% { box-shadow: 0 0 0 15px rgba(0, 123, 255, 0); }
     100% { box-shadow: 0 0 0 0 rgba(0, 123, 255, 0); }
 }
+
+/* Ajustes para telas pequenas (Mobile) */
+@media (max-width: 768px) {
+    .navbar-vibe {
+        height: 70px; /* Reduz altura da barra no mobile */
+        padding: 5px 15px;
+    }
+    
+    #main-container {
+        height: calc(100vh - 70px); 
+    }
+
+    #map {
+        width: 100%;
+        height: 100%;
+    }
+}
+
+/* Garante que o Offcanvas (Sidebar Mobile) use o estilo escuro do Vibe */
+.offcanvas {
+    background-color: #121826 !important;
+    border-right: 1px solid #222b3e;
+}
