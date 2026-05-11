@@ -10,6 +10,7 @@ ALLOWED_HOSTS = []
 
 INSTALLED_APPS = [
     'eventos',
+    'usuarios',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -79,11 +80,10 @@ DATABASES = {
 
 SECURE_REFERRER_POLICY = "no-referrer-when-downgrade"
 
-# US-EV-06: Configuração do Geocoder
 LEAFLET_CONFIG = {
     'DEFAULT_CENTER': (-10.18, -48.33),
     'DEFAULT_ZOOM': 13,
-    'TILES': 'https://tiles.stadiamaps.com/tiles/alidade_smooth_dark/{z}/{x}/{y}{r}.png',
+    'TILES': 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
     'ATTRIBUTION_PREFIX': 'VibeEvents',
     'PLUGINS': {
         'geocoder': {
@@ -93,3 +93,7 @@ LEAFLET_CONFIG = {
         }
     }
 }
+
+CSRF_TRUSTED_ORIGINS = [
+    'https://halogen-delay-uncharted.ngrok-free.dev',
+]

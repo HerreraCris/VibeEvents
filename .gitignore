@@ -1,9 +1,6 @@
-# Ambientes Virtuais (Essencial para não subir a venv do Ubuntu)
+__pycache__/
+*.pyc
 venv/
-env/
-
-# Configurações do Django e Segredos
-db.sqlite3
 .env
 local_settings.py
 
@@ -11,3 +8,4 @@ local_settings.py
 __pycache__/
 *.pyc
 .DS_Store
+ origin/develop

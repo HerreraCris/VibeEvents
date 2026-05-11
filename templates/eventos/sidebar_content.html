@@ -1,0 +1,53 @@
+<!-- Conteúdo unificado da Sidebar para Desktop e Mobile -->
+<div class="d-md-none mb-4">
+    <a href="{% url 'sugerir_evento' %}" class="btn btn-primary w-100 rounded-pill shadow-sm">
+        <i class="bi bi-plus-circle me-1"></i> Sugerir Novo Evento
+    </a>
+    <hr class="border-secondary">
+</div>
+<div class="p-1">
+    <h6 class="text-muted text-uppercase small letter-spacing-1 mb-3">Quando?</h6>
+    <div class="mb-4 d-flex flex-wrap gap-2">
+        <a href="?" class="btn-periodo {% if not periodo_atual %}active{% endif %}">Todos</a>
+        <a href="?periodo=hoje" class="btn-periodo {% if periodo_atual == 'hoje' %}active{% endif %}">Hoje</a>
+        <a href="?periodo=fds" class="btn-periodo {% if periodo_atual == 'fds' %}active{% endif %}">FDS</a>
+        <a href="?periodo=7dias" class="btn-periodo {% if periodo_atual == '7dias' %}active{% endif %}">7 Dias</a>
+    </div>
+
+    <h6 class="text-muted text-uppercase small letter-spacing-1 mb-3">Meus Eventos</h6>
+    <div class="mb-4">
+        <button id="btn-show-favs" class="btn-periodo" onclick="toggleFiltroFavoritos()">
+            <i class="bi bi-heart-fill me-1"></i> Meus Favoritos
+        </button>
+    </div>
+
+    <h6 class="text-muted text-uppercase small letter-spacing-1 mb-3">Impacto Social</h6>
+    <div class="form-check form-switch mb-4">
+        <input class="form-check-input" type="checkbox" id="filter-solidario" onchange="filterChange()">
+        <label class="form-check-label text-white" for="filter-solidario">Apenas Solidários ❤️</label>
+    </div>
+
+    <h6 class="text-muted text-uppercase small letter-spacing-1 mb-3">Explorar Categorias</h6>
+    <div class="mb-4"> 
+        <div class="filter-badge active" data-cat="ALL" onclick="updateCategory(this)">Todos</div>
+        <div class="filter-badge" data-cat="MUSI" onclick="updateCategory(this)">
+            <i class="bi bi-music-note"></i> Música
+        </div>
+        <div class="filter-badge" data-cat="CULT" onclick="updateCategory(this)">
+            <i class="bi bi-palette"></i> Cultura
+        </div>
+        <div class="filter-badge" data-cat="ESPO" onclick="updateCategory(this)">
+            <i class="bi bi-trophy"></i> Esporte
+        </div>
+        <div class="filter-badge" data-cat="EMPR" onclick="updateCategory(this)">
+            <i class="bi bi-briefcase"></i> Empreendedorismo
+        </div>
+    </div>
+
+    <hr class="border-secondary">
+    
+    <h6 class="text-muted text-uppercase small letter-spacing-1 mb-3">Eventos Disponíveis</h6>
+    <div id="event-list-container">
+        <!-- Lista gerada dinamicamente pelo JavaScript -->
+    </div>
+</div>
