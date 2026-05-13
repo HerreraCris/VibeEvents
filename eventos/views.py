@@ -1,7 +1,8 @@
 from django.shortcuts import render, redirect
 from django.core.serializers import serialize
 from django.contrib.admin.views.decorators import staff_member_required
-from django.utils import timezone   
+from django.utils import timezone  
+from django.contrib.auth.decorators import login_required 
 from datetime import timedelta     
 from .models import Evento
 from usuarios.models import Perfil
@@ -66,6 +67,8 @@ def cadastrar_evento_curadoria(request):
     
     return render(request, 'eventos/curadoria_cadastro.html', {'form': form})
 
+
+@login_required(login_url='login') # Redireciona convidados para o login
 def sugerir_evento_publico(request):
     if request.method == 'POST':
         form = EventoCuradoriaForm(request.POST)

@@ -97,3 +97,7 @@ LEAFLET_CONFIG = {
 CSRF_TRUSTED_ORIGINS = [
     'https://halogen-delay-uncharted.ngrok-free.dev',
 ]
+
+LOGIN_REDIRECT_URL = 'mapa_eventos'
+LOGOUT_REDIRECT_URL = 'mapa_eventos'
+LOGIN_URL = 'login' 
