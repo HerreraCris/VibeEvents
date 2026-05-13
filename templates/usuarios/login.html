@@ -1,0 +1,43 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+<div class="container d-flex align-items-center justify-content-center" style="min-height: 80vh;">
+    <div class="card shadow-sm border-0" style="width: 100%; max-width: 400px;">
+        <div class="card-body p-4">
+            <h2 class="text-center fw-bold mb-4">Entrar no VibeEvents</h2>
+            
+            <form method="post" action="{% url 'login' %}">
+                {% csrf_token %}
+                
+                {% if form.errors %}
+                    <div class="alert alert-danger p-2 small">
+                        E-mail ou senha incorretos. Por favor, tente novamente.
+                    </div>
+                {% endif %}
+
+                <div class="mb-3">
+                    <label for="id_username" class="form-label small text-muted">E-mail</label>
+                    <input type="text" name="username" class="form-control form-control-lg" id="id_username" required>
+                </div>
+
+                <div class="mb-4">
+                    <label for="id_password" class="form-label small text-muted">Senha</label>
+                    <input type="password" name="password" class="form-control form-control-lg" id="id_password" required>
+                </div>
+
+                <input type="hidden" name="next" value="{{ next }}">
+
+                <button type="submit" class="btn btn-primary btn-lg w-100 shadow-sm mb-3">
+                    Acessar Conta
+                </button>
+            </form>
+
+            <div class="text-center mt-3">
+                <p class="text-muted small">Não tem uma conta? <a href="{% url 'registro' %}" class="text-decoration-none fw-bold">Criar conta em Palmas</a></p>
+                <a href="{% url 'mapa_eventos' %}" class="text-muted text-decoration-none d-block mt-2 small">Continuar como convidado</a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

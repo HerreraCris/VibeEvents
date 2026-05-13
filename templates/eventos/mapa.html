@@ -61,17 +61,32 @@
 
     <nav class="navbar navbar-vibe d-flex align-items-center justify-content-between">
         <div class="d-flex align-items-center">
-            <!-- Botão Menu Mobile -->
             <button class="btn btn-outline-light d-md-none me-3" type="button" data-bs-toggle="offcanvas" data-bs-target="#offcanvasSidebar">
                 <i class="bi bi-list" style="font-size: 1.5rem;"></i>
             </button>
             <img src="{% static 'img/vibeevents-icon.png' %}" alt="Logo" style="height: 70px; width: auto" class="me-3">
         </div>
-        <a href="{% url 'sugerir_evento' %}" class="btn btn-outline-light btn-sm rounded-pill d-none d-sm-block">
-            <i class="bi bi-plus-circle me-1"></i> Sugerir Evento
-        </a>
-    </nav>
 
+        <div class="d-flex align-items-center gap-3">
+            {% if user.is_authenticated %}
+                <span class="text-white small d-none d-md-block">Olá, <b>{{ user.username }}</b></span>
+                <a href="{% url 'sugerir_evento' %}" class="btn btn-outline-light btn-sm rounded-pill">
+                    <i class="bi bi-plus-circle me-1"></i> Sugerir Evento
+                </a>
+                <form action="{% url 'logout' %}" method="post" class="m-0">
+                    {% csrf_token %}
+                    <button type="submit" class="btn btn-sm btn-link text-danger text-decoration-none p-0">Sair</button>
+                </form>
+            {% else %}
+                <a href="{% url 'login' %}?next={% url 'mapa_eventos' %}" class="btn btn-primary btn-sm rounded-pill">
+                    Entrar
+                </a>
+                <a href="{% url 'registro' %}" class="btn btn-outline-light btn-sm rounded-pill d-none d-sm-block">
+                    Criar Conta
+                </a>
+            {% endif %}
+        </div>
+    </nav>
 <div id="main-container">
         <!-- Sidebar Desktop -->
         <aside id="sidebar" class="d-none d-md-block">
@@ -108,15 +123,22 @@
     <script src="https://unpkg.com/leaflet-control-geocoder/dist/Control.Geocoder.js"></script>
     <script src="{% static 'js/mapa.js' %}?v={% now 'U' %}"></script>
     <script>
+        window.USER_AUTHENTICATED = {{ user.is_authenticated|yesno:"true,false" }};
+        window.LOGIN_URL = "{% url 'login' %}?next=" + window.location.pathname;
+
         window.getFavoritos = window.getFavoritos || function() {
             return JSON.parse(localStorage.getItem('vibe_favs')) || [];
         };
 
         let currentCategory = 'ALL';
         let apenasFavoritos = false;
-
         function toggleFavorito(eventoId) {
-            // Chama a função única do mapa.js
+            if (!window.USER_AUTHENTICATED) {
+                alert("Crie uma conta ou faça login para favoritar este evento!");
+                window.location.href = window.LOGIN_URL;
+                return;
+            }
+            
             if (typeof window.gerenciarFavoritoMapa === 'function') {
                 window.gerenciarFavoritoMapa(eventoId);
             }
