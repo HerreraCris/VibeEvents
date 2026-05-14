@@ -37,3 +37,25 @@ def onboarding(request):
         form = OnboardingForm(instance=perfil)
     
     return render(request, 'usuarios/onboarding.html', {'form': form})
+@login_required
+def editar_perfil(request):
+    perfil, _ = Perfil.objects.get_or_create(usuario=request.user)
+    
+    if request.method == 'POST':
+        interesses_selecionados = request.POST.getlist('interesses')
+        perfil.interesses = interesses_selecionados
+        perfil.save()
+        return redirect('mapa_eventos')
+    
+    # Lista atualizada com as 4 categorias oficiais
+    categorias = [
+        ('ESPO', 'Esporte'), 
+        ('MUSI', 'Música'), 
+        ('EMPR', 'Empreendedorismo'), 
+        ('CULT', 'Cultura')
+    ]
+    
+    return render(request, 'usuarios/perfil.html', {
+        'perfil': perfil,
+        'categorias': categorias
+    })
