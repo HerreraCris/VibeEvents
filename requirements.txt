@@ -9,3 +9,5 @@ python-decouple
 
 # Integração com Mapas Leaflet
 django-leaflet
+
+ whitenoise
