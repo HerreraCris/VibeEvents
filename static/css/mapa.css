@@ -11,6 +11,8 @@
 
 /* 1. Suavização de Fontes (Movido para dentro do CSS corretamente) */
 body {
+    -webkit-user-select: none; user-select: none;
+    overscroll-behavior-y: contain;
     margin: 0;
     padding: 0;
     background-color: var(--bg-dark);
@@ -170,3 +172,5 @@ h6.text-muted {
     background-color: #121826 !important;
     border-right: 1px solid #222b3e;
 }
+
+
