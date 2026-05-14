@@ -1,0 +1,15 @@
+{
+  "name": "VibeEvents Palmas",
+  "short_name": "VibeEvents",
+  "description": "Mapa de eventos e experiências em Palmas, Tocantins.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#0b0f19",
+  "theme_color": "#0b0f19",
+  "icons": [
+    
+    { "src": "/static/img/icon-192.png", "sizes": "192x192", "type": "image/png" },
+    { "src": "/static/img/icon-512.png", "sizes": "512x512", "type": "image/png" }    
+    
+  ]
+}
