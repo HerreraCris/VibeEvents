@@ -174,3 +174,36 @@ h6.text-muted {
 }
 
 
+.view-toggle-container {
+    position: fixed;
+    bottom: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 1050;
+}
+
+.view-toggle-container .btn {
+    min-height: 48px;
+    padding: 0 20px;
+    font-weight: 600;
+}
+
+.event-card {
+    background: #1e2533;
+    border: 1px solid #2d3748;
+    border-radius: 15px;
+    overflow: hidden;
+    transition: transform 0.2s;
+}
+
+.event-card:active {
+    transform: scale(0.98);
+}
+
+.distancia-badge {
+    background: rgba(13, 110, 253, 0.2);
+    color: #7dacfd;
+    font-size: 0.8rem;
+    padding: 4px 8px;
+    border-radius: 5px;
+}
