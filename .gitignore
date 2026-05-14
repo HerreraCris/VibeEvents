@@ -1,11 +1,24 @@
+# Python
 __pycache__/
-*.pyc
-venv/
-.env
-local_settings.py
+*.py[cod]
 
-# Arquivos de Cache e Sistema
-__pycache__/
-*.pyc
+# Virtual environments
+venv/
+.venv/
+env/
+ENV/
+
+# Environment variables
+.env
+.env.*
+
+# Django
+local_settings.py
+db.sqlite3
+
+# OS files
 .DS_Store
- origin/develop
+Thumbs.db
+
+# Windows ADS
+*Zone.Identifier
