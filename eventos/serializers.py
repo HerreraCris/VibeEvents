@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import Evento
+from .models import Evento, Comentario
 
 class EventoSerializer(serializers.ModelSerializer):
     categoria_display = serializers.CharField(source='get_categoria_display', read_only=True)
