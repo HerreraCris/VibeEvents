@@ -21,4 +21,6 @@ db.sqlite3
 Thumbs.db
 
 # Windows ADS
-*Zone.Identifier
+*Zone.Identifiervenv/
+__pycache__/
+*.pyc
