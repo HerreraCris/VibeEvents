@@ -9,4 +9,5 @@ urlpatterns = [
     path('curadoria/novo/', views.cadastrar_evento_curadoria, name='curadoria_novo'),
     path('sugestao-enviada/', views.sugestao_sucesso, name='sugestao_sucesso'),
     path('api/eventos/', EventoListAPIView.as_view(), name='api-eventos-list'),
+    path('evento/<int:evento_id>/comentar/', views.comentar_evento, name='comentar_evento'),
 ]

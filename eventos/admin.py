@@ -1,6 +1,6 @@
 from django.contrib import admin
 from leaflet.admin import LeafletGeoAdmin
-from .models import Evento
+from .models import Evento, Comentario
 from django.utils import timezone
 from datetime import timedelta
 from django.utils.html import format_html
@@ -91,3 +91,8 @@ class EventoAdmin(LeafletGeoAdmin):
     def rejeitar_eventos(self, request, queryset):
         rows_updated = queryset.update(status='REJE')
         self.message_user(request, f"{rows_updated} eventos foram marcados como rejeitados.")
+
+@admin.register(Comentario)
+class ComentarioAdmin(admin.ModelAdmin):
+    list_display = ('usuario', 'evento', 'criado_em')
+    search_fields = ('usuario__username', 'texto')

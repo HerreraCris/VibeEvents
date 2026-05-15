@@ -135,6 +135,30 @@
                             <b>Endereço:</b><br><span id="${addressId}">Carregando...</span>
                         </p>
                         <!-- ... botão ingresso ... -->
+                        <hr>
+                        <div style="margin-top: 10px;">
+                            <h6 style="font-size: 0.9rem;">Comentários</h6>
+
+                            <div id="comentarios-${evento.id}" style="max-height: 150px; overflow-y: auto; margin-bottom: 8px; font-size: 0.8rem;">
+                                ${(evento.comentarios || []).map(c => `
+                                    <div style="border-bottom:1px solid #ddd; padding:6px 0;">
+                                        <b>${c.usuario}</b>
+                                        <small style="display:block; color:#777;">${c.data}</small>
+                                        ${c.texto}
+                                    </div>
+                                `).join('')}
+                            </div>
+
+                            <textarea id="texto-comentario-${evento.id}" 
+                                class="form-control form-control-sm" 
+                                rows="2"
+                                placeholder="Digite um comentário"></textarea>
+
+                            <button class="btn btn-primary btn-sm mt-2 w-100"
+                                onclick="enviarComentario('${evento.id}')">
+                                Enviar
+                            </button>
+                        </div>
                     </div>`;
                 };
                 marker.bindPopup(getPopupContent, { maxWidth: 300 });
@@ -276,3 +300,82 @@
                 `;
             });
     }
+
+window.enviarComentario = function(eventoId) {
+    const textoInput = document.getElementById(`texto-comentario-${eventoId}`);
+    const texto = textoInput.value.trim();
+
+    if (!texto) {
+        alert("Digite um comentário antes de enviar.");
+        return;
+    }
+
+    fetch(`/evento/${eventoId}/comentar/`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/x-www-form-urlencoded',
+            'X-CSRFToken': getCookie('csrftoken')
+        },
+        body: `texto=${encodeURIComponent(texto)}`
+    })
+
+    .then(response => {
+        if (response.redirected) {
+            alert("Você precisa estar logado para comentar.");
+            return null;
+        }
+
+        return response.json().then(data => ({
+            status: response.status,
+            body: data
+        }));
+    })
+    .then(result => {
+        if (!result) return;
+
+        if (result.status !== 200) {
+            alert(result.body.erro || "Não foi possível enviar seu comentário.");
+            return;
+        }
+
+
+        const data = result.body;
+        const container = document.getElementById(`comentarios-${eventoId}`);
+
+        container.innerHTML = data.comentarios.map(c => `
+            <div style="border-bottom:1px solid #ddd; padding:6px 0;">
+                <b>${c.usuario}</b>
+                <small style="display:block; color:#777;">${c.data}</small>
+                ${c.texto}
+            </div>
+        `).join('');
+
+        allMarkers.forEach(marker => {
+            if (marker.eventoData.id == eventoId) {
+                marker.eventoData.comentarios = data.comentarios;
+            }
+        });
+
+        textoInput.value = '';
+    })
+    .catch(error => {
+        console.error(error);
+        alert("Falha na conexão. Tente novamente.");
+    });
+};
+
+
+function getCookie(name) {
+    let cookieValue = null;
+    if (document.cookie && document.cookie !== '') {
+        const cookies = document.cookie.split(';');
+        for (let cookie of cookies) {
+            cookie = cookie.trim();
+            if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                break;
+            }
+        }
+    }
+    return cookieValue;
+}

@@ -1,7 +1,7 @@
 from django import forms
 from leaflet.forms.widgets import LeafletWidget
 from django.contrib.gis.forms import PointField, OSMWidget
-from .models import Evento
+from .models import Evento, Comentario
 
 
 class EventoCuradoriaForm(forms.ModelForm):
@@ -20,3 +20,14 @@ class EventoCuradoriaForm(forms.ModelForm):
                 'link_externo': forms.URLInput(attrs={'class': 'form-control bg-dark text-white border-secondary'}),
                 'descricao': forms.Textarea(attrs={'class': 'form-control bg-dark text-white border-secondary', 'rows': 3}),
             }
+class ComentarioForm(forms.ModelForm):
+    class Meta:
+        model = Comentario
+        fields = ['texto']
+        widgets = {
+            'texto': forms.Textarea(attrs={
+                'class': 'form-control bg-dark text-white border-secondary',
+                'rows': 3,
+                'placeholder': 'Deixe seu comentário sobre este evento...'
+            })
+        }

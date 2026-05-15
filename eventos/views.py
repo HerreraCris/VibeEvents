@@ -10,6 +10,10 @@ from .forms import EventoCuradoriaForm
 import json
 from rest_framework import generics
 from .serializers import EventoSerializer
+from django.http import JsonResponse
+from .models import Comentario
+from .forms import ComentarioForm
+from django.views.decorators.http import require_POST
 
 def mapa_eventos(request):
     eventos = Evento.objects.filter(status='PUBL')
@@ -40,12 +44,27 @@ def mapa_eventos(request):
                                 fields=('nome', 'data_evento', 'is_beneficente', 'link_externo', 'categoria' , 'descricao', 'nome_local'))
     
     eventos_data = json.loads(eventos_geojson)
-    
+
     simplified_events = []
+
     for feature in eventos_data['features']:
-        event_dict = feature['properties']
-        event_dict['localizacao'] = feature['geometry'] 
-        event_dict['id'] = feature.get('id', event_dict['nome'].replace(' ', '_'))
+        event_dict = feature['properties']   # <- faltando
+
+        event_dict['localizacao'] = feature['geometry']
+        event_dict['id'] = feature.get('id', str(feature['id']))
+
+        evento_obj = Evento.objects.get(id=feature['id'])
+        comentarios = evento_obj.comentarios.order_by('-criado_em')[:10]
+
+        event_dict['comentarios'] = [
+            {
+                'usuario': c.usuario.username,
+                'texto': c.texto,
+                'data': c.criado_em.strftime('%d/%m/%Y %H:%M')
+            }
+            for c in comentarios
+        ]
+
         simplified_events.append(event_dict)
 
     context = {
@@ -93,3 +112,42 @@ class EventoListAPIView(generics.ListAPIView):
     """
     queryset = Evento.objects.filter(status='PUBL').order_by('data_evento')
     serializer_class = EventoSerializer
+
+@require_POST
+@login_required(login_url='login')
+def comentar_evento(request, evento_id):
+    evento = Evento.objects.get(id=evento_id)
+
+    texto = request.POST.get('texto', '').strip()
+
+    palavras_bloqueadas = [
+        'porra', 'caralho', 'merda', 'fdp', 'puta',
+        'viado', 'bosta', 'desgraça'
+    ]
+
+    texto_lower = texto.lower()
+
+    for palavra in palavras_bloqueadas:
+        if palavra in texto_lower:
+            return JsonResponse({
+                'erro': 'Comentário contém linguagem inadequada.'
+            }, status=400)
+
+    Comentario.objects.create(
+        evento=evento,
+        usuario=request.user,
+        texto=texto
+    )
+
+    comentarios = evento.comentarios.order_by('-criado_em')[:10]
+
+    data = [
+        {
+            'usuario': c.usuario.username,
+            'texto': c.texto,
+            'data': c.criado_em.strftime('%d/%m/%Y %H:%M')
+        }
+        for c in comentarios
+    ]
+
+    return JsonResponse({'comentarios': data})
