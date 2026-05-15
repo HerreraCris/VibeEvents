@@ -22,7 +22,6 @@ class PeriodoFilter(admin.SimpleListFilter):
         if self.value() == 'hoje':
             return queryset.filter(data_evento__date=hoje)
         if self.value() == 'fds':
-            # Calcula próxima sexta e domingo
             sexta = hoje + timedelta(days=(4 - hoje.weekday()) % 7)
             domingo = sexta + timedelta(days=2)
             return queryset.filter(data_evento__date__range=[sexta, domingo])
@@ -36,44 +35,53 @@ class EventoAdmin(LeafletGeoAdmin):
     list_display = (
         'nome_formatado', 
         'categoria', 
-        'data_evento', 
-        'status',          # <--- Adicione o campo real aqui
-        'status_colorido',  # Este é o que tem as bolinhas coloridas
+        'data_evento',      # Início (Campo original)
+        'data_fim',         # Término (Novo campo)
+        'status',           # Moderação (Campo original)
+        'status_colorido',  # Bolinhas de moderação
+        'situacao_colorida', # US-EV-27: Futuro, Acontecendo, Finalizado
         'is_beneficente'
-    )
+    )    
     
-    # Agora o Django não vai mais reclamar
     list_editable = ('status',)
-
-    # Filtros laterais para facilitar a vida do moderador
-    list_filter = ('status', 'categoria', 'is_beneficente', 'data_evento')
-        
-    # Busca rápida por nome ou local
+    list_filter = ('status', 'categoria', 'is_beneficente', 'data_evento', PeriodoFilter)
     search_fields = ('nome', 'nome_local', 'descricao')
-
-    # Ações em massa: Aprovar ou Rejeitar vários de uma vez
     actions = ['aprovar_eventos', 'rejeitar_eventos']
 
-    # Customização visual do nome para facilitar leitura
     def nome_formatado(self, obj):
         return format_html('<b>{}</b><br><small style="color:#999">{}</small>', obj.nome, obj.nome_local)
     nome_formatado.short_description = 'Evento / Local'
 
-    # Status com cores para o Moderador bater o olho e saber o que falta
+    # Moderação (PEND, PUBL, REJE)
     def status_colorido(self, obj):
         cores = {
-            'PEND': '#ff9800', # Laranja
-            'PUBL': '#4caf50', # Verde
-            'REJE': '#f44336', # Vermelho
+            'PEND': '#ff9800', 
+            'PUBL': '#4caf50', 
+            'REJE': '#f44336', 
         }
         return format_html(
             '<span style="color: {}; font-weight: bold;">● {}</span>',
             cores.get(obj.status, '#ccc'),
             obj.get_status_display()
         )
-    status_colorido.short_description = 'Situação'
+    status_colorido.short_description = 'Curadoria'
 
-    # Lógica das Ações em Massa
+    # NOVO: Lógica da US-EV-27 baseada no tempo
+    def situacao_colorida(self, obj):
+        situacao = obj.situacao_no_tempo # Chama a property do seu Model
+        cores = {
+            'FUTURO': '#2196f3',      # Azul
+            'ACONTECENDO': '#4caf50', # Verde
+            'FINALIZADO': '#9e9e9e',  # Cinza
+        }
+        cor = cores.get(situacao, '#ccc')
+        return format_html(
+            '<span style="background: {}; color: white; padding: 3px 8px; border-radius: 10px; font-size: 10px; font-weight: bold;">{}</span>',
+            cor,
+            situacao
+        )
+    situacao_colorida.short_description = 'Ciclo de Vida'
+
     @admin.action(description="🚀 Publicar eventos selecionados")
     def aprovar_eventos(self, request, queryset):
         rows_updated = queryset.update(status='PUBL')
