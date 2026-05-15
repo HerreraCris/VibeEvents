@@ -7,6 +7,7 @@ class Evento(models.Model):
         ('PEND', 'Pendente (Análise)'),
         ('PUBL', 'Publicado'),
         ('REJE', 'Rejeitado'),
+        ('ARQU', 'Arquivado (Passado)'),
     ]
 
     CATEGORIAS_CHOICES = [
