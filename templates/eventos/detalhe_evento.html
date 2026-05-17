@@ -96,6 +96,22 @@
         background: #95bcff;
     }
 
+    /* Estilo customizado para o botão de Rotas */
+    .btn-rota {
+        background: transparent;
+        border: 2px solid #7DACFD;
+        color: #7DACFD;
+        font-weight: 600;
+        border-radius: 12px;
+        padding: 12px;
+        transition: all 0.2s ease;
+    }
+
+    .btn-rota:hover {
+        background: #7DACFD;
+        color: #0b0f19;
+    }
+
     .carousel-item img {
         height: 420px;
         object-fit: cover;
@@ -135,30 +151,40 @@
                 </div>
             </div>
 
+            <div class="mb-4">
+                <a id="btn-ir-agora" href="#" target="_blank" class="btn btn-rota w-100 d-flex align-items-center justify-content-center gap-2">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="currentColor" class="bi bi-cursor-fill" viewBox="0 0 16 16">
+                        <path d="M14.082 2.182a.5.5 0 0 1 .103.557L8.528 15.467a.5.5 0 0 1-.917-.007L5.57 10.694.803 8.652a.5.5 0 0 1-.006-.916l12.728-5.657a.5.5 0 0 1 .556.103z"/>
+                    </svg>
+                    Ir agora (Traçar Rota)
+                </a>
+            </div>
+
             <div class="evento-info mb-5">
                 <strong>📝 Sobre o evento</strong><br><br>
                 {{ evento.descricao }}
             </div>
-                {% if clima and not clima.erro and clima.temperatura %}
-                <div class="evento-info mb-5">
-                    <strong>🌤️ Clima no dia</strong><br><br>
 
-                    <div class="d-flex align-items-center gap-3">
-                        <img src="https://openweathermap.org/img/wn/{{ clima.icone }}@2x.png">
+            {% if clima and not clima.erro and clima.temperatura %}
+            <div class="evento-info mb-5">
+                <strong>🌤️ Clima no dia</strong><br><br>
 
-                        <div>
-                            <h4 class="mb-1">{{ clima.temperatura }}°C</h4>
-                            <span class="text-secondary">{{ clima.descricao }}</span>
-                        </div>
+                <div class="d-flex align-items-center gap-3">
+                    <img src="https://openweathermap.org/img/wn/{{ clima.icone }}@2x.png">
+
+                    <div>
+                        <h4 class="mb-1">{{ clima.temperatura }}°C</h4>
+                        <span class="text-secondary">{{ clima.descricao }}</span>
                     </div>
                 </div>
+            </div>
 
-                {% elif clima.erro %}
-                <div class="evento-info mb-5">
-                    <strong>🌤️ Clima no dia</strong><br><br>
-                    <span class="text-secondary">{{ clima.erro }}</span>
-                </div>
-                {% endif %}
+            {% elif clima.erro %}
+            <div class="evento-info mb-5">
+                <strong>🌤️ Clima no dia</strong><br><br>
+                <span class="text-secondary">{{ clima.erro }}</span>
+            </div>
+            {% endif %}
 
             <h4 class="section-title">📸 Fotos do evento</h4>
 
@@ -239,5 +265,34 @@
         </div>
     </div>
 </div>
+
+<script>
+    document.addEventListener("DOMContentLoaded", function() {
+        // Captura os dados brutos salvos no banco
+        let rawLat = "{{ evento.localizacao.y }}";
+        let rawLng = "{{ evento.localizacao.x }}";
+
+        const btnRota = document.getElementById("btn-ir-agora");
+
+        if (btnRota && rawLat && rawLng) {
+            // Substitui todas as vírgulas por pontos para forçar o padrão numérico internacional
+            const lat = rawLat.replace(",", ".");
+            const lng = rawLng.replace(",", ".");
+
+            const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
+
+            let urlScheme = "";
+
+            if (isIOS) {
+                urlScheme = "maps://maps.apple.com/?daddr=" + lat + "," + lng;
+            } else {
+                // Utilizando o endpoint de busca estruturada que funciona perfeitamente com pontos decimais
+                urlScheme = "https://www.google.com/maps/search/?api=1&query=" + lat + "," + lng;
+            }
+
+            btnRota.setAttribute("href", urlScheme);
+        }
+    });
+</script>
 
 {% endblock %}
