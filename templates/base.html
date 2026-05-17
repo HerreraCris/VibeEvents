@@ -7,10 +7,15 @@
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <link rel="apple-touch-icon" href="{% static 'img/icon-192.png' %}">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="apple-mobile-web-app-capable" content="yes">
     <link rel="apple-touch-icon" href="{% static 'img/vibeevents-icon.png' %}">
-    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <title>VibeEvents Palmas</title>
+    
+    {% block opengraph %}
+    <meta property="og:title" content="VibeEvents Palmas">
+    <meta property="og:description" content="Descubra os melhores eventos de Palmas e trace rotas em tempo real.">
+    <meta property="og:type" content="website">
+    {% endblock %}
+
     <link rel="manifest" href="{% static 'manifest.json' %}">
     <meta name="theme-color" content="#0b0f19">
     <link rel="stylesheet" href="{% static 'bootstrap-5.3.8/css/bootstrap.min.css' %}">

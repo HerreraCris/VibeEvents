@@ -19,13 +19,13 @@ def mapa_eventos(request):
     eventos = Evento.objects.filter(status='PUBL')
     interesses_usuario = []
     periodo = request.GET.get('periodo')
+    evento_foco_id = request.GET.get('evento_id') # CAPTURA O ID ENVIADO PELO WHATSAPP (US-EV-21)
     hoje = timezone.now().date()
+    
     if request.user.is_authenticated:
         perfil, _ = Perfil.objects.get_or_create(usuario=request.user)
-        
         if perfil.primeiro_acesso:
             return redirect('onboarding') 
-        
         interesses_usuario = perfil.interesses 
 
     if periodo == 'hoje':
@@ -45,7 +45,6 @@ def mapa_eventos(request):
 
     for feature in eventos_data['features']:
         event_dict = feature['properties']   
-
         event_dict['localizacao'] = feature['geometry']
         event_dict['id'] = feature.get('id', str(feature['id']))
 
@@ -54,8 +53,8 @@ def mapa_eventos(request):
             event_dict['imagem'] = evento_obj.imagem_capa.url
         else:
             event_dict['imagem'] = '/static/img/default-event.jpg'
+            
         comentarios = evento_obj.comentarios.order_by('-criado_em')[:10]
-
         event_dict['comentarios'] = [
             {
                 'usuario': c.usuario.username,
@@ -64,13 +63,13 @@ def mapa_eventos(request):
             }
             for c in comentarios
         ]
-
         simplified_events.append(event_dict)
 
     context = {
         'eventos_js': simplified_events, 
         'periodo_atual': periodo,
-        'interesses_usuario': json.dumps(interesses_usuario) 
+        'interesses_usuario': json.dumps(interesses_usuario),
+        'evento_foco_id': evento_foco_id # INJETA NO TEMPLATE PARA O SCRIPT DO LEAFLET CAPTURAR (US-EV-21)
     }
     return render(request, 'eventos/mapa.html', context)
     
@@ -85,7 +84,6 @@ def cadastrar_evento_curadoria(request):
             return redirect('mapa_eventos')
     else:
         form = EventoCuradoriaForm()
-    
     return render(request, 'eventos/curadoria_cadastro.html', {'form': form})
 
 @login_required(login_url='login') 
@@ -100,13 +98,10 @@ def sugerir_evento_publico(request):
             return redirect('sugestao_sucesso')
     else:
         form = EventoCuradoriaForm()
-    
     return render(request, 'eventos/sugerir_evento.html', {'form': form})
-
     
 def sugestao_sucesso(request):
     return render(request, 'eventos/sugestao_sucesso.html')
-
 
 class EventoListAPIView(generics.ListAPIView):
     queryset = Evento.objects.filter(status='PUBL').order_by('data_evento')
@@ -146,9 +141,7 @@ def comentar_evento(request, evento_id):
 
     if request.headers.get('x-requested-with') == 'XMLHttpRequest':
         return JsonResponse({'comentarios': data})
-
     return redirect('detalhe_evento', evento_id=evento.id)
-
 
 def detalhe_evento(request, evento_id):
     evento = get_object_or_404(Evento, id=evento_id)
@@ -196,12 +189,10 @@ def detalhe_evento(request, evento_id):
     }
     return render(request, 'eventos/detalhe_evento.html', context)
 
-
 @login_required(login_url='login')
 @require_POST
 def upload_foto_evento(request, evento_id):
     evento = get_object_or_404(Evento, id=evento_id)
-
     if not (request.user.is_staff or request.user == evento.criado_por):
         return redirect('detalhe_evento', evento_id=evento.id)
 
@@ -214,8 +205,6 @@ def upload_foto_evento(request, evento_id):
         )
     return redirect('detalhe_evento', evento_id=evento.id)
 
-
-# NOVA VIEW US-EV-20: Processamento AJAX para confirmar ou remover presenca
 @login_required(login_url='login')
 @require_POST
 def alternar_presenca_evento(request, evento_id):
