@@ -107,3 +107,5 @@ CSRF_TRUSTED_ORIGINS = [
 LOGIN_REDIRECT_URL = 'mapa_eventos'
 LOGOUT_REDIRECT_URL = 'mapa_eventos'
 LOGIN_URL = 'login' 
+MEDIA_URL = '/media/'
+MEDIA_ROOT = BASE_DIR / 'media'

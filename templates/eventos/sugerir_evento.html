@@ -104,8 +104,8 @@
 
             <div class="vibe-card">
                 <h2 class="fw-bold mb-4">Novo <span class="vibe-accent">Evento.</span></h2>
-                
-                <form method="post" novalidate>
+
+                <form method="post" enctype="multipart/form-data" novalidate>
                     {% csrf_token %}
                     
                     <div class="row g-5">
@@ -113,6 +113,15 @@
                             <div class="mb-4">
                                 <label class="form-label fw-semibold">Nome da Experiência</label>
                                 {{ form.nome }}
+                            </div>
+                            <div class="mb-4">
+                                <label class="form-label fw-semibold">Local do Evento</label>
+                                {{ form.nome_local }}
+                            </div>
+
+                            <div class="mb-4">
+                                <label class="form-label fw-semibold">Foto de Capa</label>
+                                {{ form.imagem_capa }}
                             </div>
 
                             <div class="row mb-4">
