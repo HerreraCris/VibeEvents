@@ -24,9 +24,6 @@ class Evento(models.Model):
         verbose_name="Status de Moderação"
     )
 
-    def __str__(self):
-        return f"[{self.get_status_display()}] {self.nome}"
-
     criado_por = models.ForeignKey(
         User,
         on_delete=models.SET_NULL,
@@ -36,10 +33,10 @@ class Evento(models.Model):
     )
 
     imagem_capa = models.ImageField(
-    upload_to='capas_eventos/',
-    null=True,
-    blank=True
-)
+        upload_to='capas_eventos/',
+        null=True,
+        blank=True
+    )
     nome = models.CharField(max_length=200)
     descricao = models.TextField()
     data_evento = models.DateTimeField()
@@ -56,6 +53,19 @@ class Evento(models.Model):
     is_beneficente = models.BooleanField(default=False)
     link_externo = models.URLField(max_length=500)
     localizacao = gis_models.PointField()
+
+    # NOVO CAMPO US-EV-20: Relacionamento ManyToMany para os participantes confirmados
+    participantes = models.ManyToManyField(
+        User,
+        related_name='eventos_presenca',
+        blank=True
+    )
+
+    @property
+    def total_participantes(self):
+        """Retorna a contagem total de presenças confirmadas"""
+        return self.participantes.count()
+
     @property
     def situacao_no_tempo(self):
         """Calcula se o evento é Futuro, Acontecendo ou Finalizado"""
@@ -72,10 +82,9 @@ class Evento(models.Model):
             return 'ACONTECENDO'
         else:
             return 'FINALIZADO'
+
     def __str__(self):
         return f"{self.nome} - {self.get_categoria_display()}"
-
-from django.contrib.auth.models import User
 
 
 class Comentario(models.Model):
@@ -91,12 +100,10 @@ class Comentario(models.Model):
     )
 
     texto = models.TextField(max_length=500)
-
     criado_em = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
         return f"{self.usuario.username} - {self.evento.nome}"
-    
     
     
 def upload_foto_evento(instance, filename):
@@ -116,7 +123,6 @@ class FotoEvento(models.Model):
     )
 
     imagem = models.ImageField(upload_to=upload_foto_evento)
-
     criado_em = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):

@@ -96,7 +96,6 @@
         background: #95bcff;
     }
 
-    /* Estilo customizado para o botão de Rotas */
     .btn-rota {
         background: transparent;
         border: 2px solid #7DACFD;
@@ -149,6 +148,31 @@
                         {{ evento.data_evento|date:"d/m/Y H:i" }}
                     </div>
                 </div>
+            </div>
+
+            <div class="evento-info mb-4 d-flex align-items-center justify-content-between flex-wrap gap-3">
+                <div>
+                    <strong>🔥 Nível de Engajamento</strong><br>
+                    <span id="contador-presencas" class="fs-4 fw-bold text-white">{{ evento.total_participantes }}</span> 
+                    <span class="text-secondary text-sm">confirmados no rolê</span>
+                </div>
+                
+                {% if user.is_authenticated %}
+                    <button id="btn-eu-vou" 
+                            data-url="{% url 'alternar_presenca_evento' evento.id %}" 
+                            class="btn {% if user in evento.participantes.all %}btn-success{% else %}btn-outline-primary{% endif %} px-4 fw-bold" 
+                            style="border-radius: 12px; padding: 12px;">
+                        {% if user in evento.participantes.all %}
+                            ✔ Presença Confirmada!
+                        {% else %}
+                            Vou nesse!
+                        {% endif %}
+                    </button>
+                {% else %}
+                    <span class="small p-2 rounded border border-secondary" style="background-color: #080b13; color: #e2e8f0 !important; font-weight: 500;">
+                        Faça login para confirmar presença.
+                    </span>
+                {% endif %}
             </div>
 
             <div class="mb-4">
@@ -257,7 +281,7 @@
                 </form>
             </div>
             {% else %}
-                <p class="text-secondary mt-4">
+                <p class="mt-4" style="color: #94a3b8 !important; font-weight: 500;">
                     Faça login para comentar.
                 </p>
             {% endif %}
@@ -268,29 +292,57 @@
 
 <script>
     document.addEventListener("DOMContentLoaded", function() {
-        // Captura os dados brutos salvos no banco
+        // --- LOGICA DE COMPATIBILIDADE DE ROTAS (US-EV-19) ---
         let rawLat = "{{ evento.localizacao.y }}";
         let rawLng = "{{ evento.localizacao.x }}";
-
         const btnRota = document.getElementById("btn-ir-agora");
 
         if (btnRota && rawLat && rawLng) {
-            // Substitui todas as vírgulas por pontos para forçar o padrão numérico internacional
             const lat = rawLat.replace(",", ".");
             const lng = rawLng.replace(",", ".");
-
             const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
 
             let urlScheme = "";
-
             if (isIOS) {
                 urlScheme = "maps://maps.apple.com/?daddr=" + lat + "," + lng;
             } else {
-                // Utilizando o endpoint de busca estruturada que funciona perfeitamente com pontos decimais
                 urlScheme = "https://www.google.com/maps/search/?api=1&query=" + lat + "," + lng;
             }
-
             btnRota.setAttribute("href", urlScheme);
+        }
+
+        // --- LÓGICA AJAX DO CONTADOR "EU VOU" (US-EV-20) ---
+        const btnEuVou = document.getElementById("btn-eu-vou");
+        if (btnEuVou) {
+            btnEuVou.addEventListener("click", function(e) {
+                e.preventDefault();
+                const url = btnEuVou.getAttribute("data-url");
+
+                fetch(url, {
+                    method: "POST",
+                    headers: {
+                        "X-CSRFToken": "{{ csrf_token }}",
+                        "X-Requested-With": "XMLHttpRequest"
+                    }
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        // Atualiza o número de presenças sem recarregar a tela
+                        document.getElementById("contador-presencas").innerText = data.total_participantes;
+
+                        // Altera visualmente os estados e estilos do botão de forma assíncrona
+                        if (data.confirmado) {
+                            btnEuVou.innerText = "✔ Presença Confirmada!";
+                            btnEuVou.className = "btn btn-success px-4 fw-bold";
+                        } else {
+                            btnEuVou.innerText = "Vou nesse!";
+                            btnEuVou.className = "btn btn-outline-primary px-4 fw-bold";
+                        }
+                    }
+                })
+                .catch(error => console.error("Erro ao computar presença:", error));
+            });
         }
     });
 </script>
