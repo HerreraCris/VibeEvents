@@ -139,6 +139,26 @@
                 <strong>📝 Sobre o evento</strong><br><br>
                 {{ evento.descricao }}
             </div>
+                {% if clima and not clima.erro and clima.temperatura %}
+                <div class="evento-info mb-5">
+                    <strong>🌤️ Clima no dia</strong><br><br>
+
+                    <div class="d-flex align-items-center gap-3">
+                        <img src="https://openweathermap.org/img/wn/{{ clima.icone }}@2x.png">
+
+                        <div>
+                            <h4 class="mb-1">{{ clima.temperatura }}°C</h4>
+                            <span class="text-secondary">{{ clima.descricao }}</span>
+                        </div>
+                    </div>
+                </div>
+
+                {% elif clima.erro %}
+                <div class="evento-info mb-5">
+                    <strong>🌤️ Clima no dia</strong><br><br>
+                    <span class="text-secondary">{{ clima.erro }}</span>
+                </div>
+                {% endif %}
 
             <h4 class="section-title">📸 Fotos do evento</h4>
 
