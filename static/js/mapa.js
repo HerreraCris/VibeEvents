@@ -148,16 +148,10 @@
                                     </div>
                                 `).join('')}
                             </div>
-
-                            <textarea id="texto-comentario-${evento.id}" 
-                                class="form-control form-control-sm" 
-                                rows="2"
-                                placeholder="Digite um comentário"></textarea>
-
-                            <button class="btn btn-primary btn-sm mt-2 w-100"
-                                onclick="enviarComentario('${evento.id}')">
-                                Enviar
-                            </button>
+                                <hr>
+                                <a href="/evento/${evento.id}/" class="btn btn-outline-primary btn-sm w-100 mt-2">
+                                    Ver detalhes do evento
+                                </a>
                         </div>
                     </div>`;
                 };
@@ -314,7 +308,8 @@ window.enviarComentario = function(eventoId) {
         method: 'POST',
         headers: {
             'Content-Type': 'application/x-www-form-urlencoded',
-            'X-CSRFToken': getCookie('csrftoken')
+            'X-CSRFToken': getCookie('csrftoken'),
+            'X-Requested-With': 'XMLHttpRequest',
         },
         body: `texto=${encodeURIComponent(texto)}`
     })

@@ -1,0 +1,223 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+
+<style>
+    body {
+        background: #0b0f19;
+    }
+
+    .evento-card {
+        background: #121826;
+        border: 1px solid #222b3e;
+        border-radius: 20px;
+        overflow: hidden;
+        box-shadow: 0 10px 30px rgba(0,0,0,.35);
+    }
+
+    .evento-banner {
+        width: 100%;
+        height: 380px;
+        object-fit: cover;
+        border-bottom: 1px solid #222b3e;
+    }
+
+    .evento-title {
+        font-weight: 700;
+        font-size: 2rem;
+        color: #fff;
+    }
+
+    .evento-info {
+        background: #0f1523;
+        border: 1px solid #222b3e;
+        border-radius: 14px;
+        padding: 14px;
+        margin-bottom: 12px;
+    }
+
+    .section-title {
+        font-weight: 700;
+        color: #7DACFD;
+        margin-bottom: 18px;
+    }
+
+    .upload-box {
+        background: #0f1523;
+        border: 1px solid #222b3e;
+        border-radius: 14px;
+        padding: 20px;
+    }
+
+    .comentario-card {
+        background: #0f1523;
+        border: 1px solid #222b3e;
+        border-radius: 12px;
+        padding: 14px;
+        margin-bottom: 12px;
+    }
+
+    .comentario-user {
+        font-weight: 600;
+        color: #7DACFD;
+    }
+
+    .comentario-data {
+        font-size: .85rem;
+        color: #94a3b8;
+    }
+
+    textarea.form-control,
+    input.form-control {
+        background: #0f1523;
+        border: 1px solid #2b3448;
+        color: white;
+    }
+
+    textarea.form-control:focus,
+    input.form-control:focus {
+        background: #0f1523;
+        color: white;
+        border-color: #7DACFD;
+        box-shadow: 0 0 0 .2rem rgba(125,172,253,.2);
+    }
+
+    .btn-vibe {
+        background: #7DACFD;
+        color: #0b0f19;
+        font-weight: 600;
+        border: none;
+        border-radius: 10px;
+        padding: 10px 18px;
+    }
+
+    .btn-vibe:hover {
+        background: #95bcff;
+    }
+
+    .carousel-item img {
+        height: 420px;
+        object-fit: cover;
+        border-radius: 14px;
+    }
+</style>
+
+<div class="container py-5">
+
+    <a href="/" class="btn btn-outline-light mb-4 px-4 rounded-pill">
+        ← Voltar ao mapa
+    </a>
+
+    <div class="evento-card">
+
+        {% if evento.imagem_capa %}
+            <img src="{{ evento.imagem_capa.url }}" class="evento-banner">
+        {% endif %}
+
+        <div class="p-4 p-md-5">
+
+            <h2 class="evento-title mb-4">{{ evento.nome }}</h2>
+
+            <div class="row g-3 mb-4">
+                <div class="col-md-6">
+                    <div class="evento-info">
+                        <strong>📍 Local</strong><br>
+                        {{ evento.nome_local }}
+                    </div>
+                </div>
+
+                <div class="col-md-6">
+                    <div class="evento-info">
+                        <strong>🕒 Data</strong><br>
+                        {{ evento.data_evento|date:"d/m/Y H:i" }}
+                    </div>
+                </div>
+            </div>
+
+            <div class="evento-info mb-5">
+                <strong>📝 Sobre o evento</strong><br><br>
+                {{ evento.descricao }}
+            </div>
+
+            <h4 class="section-title">📸 Fotos do evento</h4>
+
+            {% if pode_enviar_foto %}
+            <div class="upload-box mb-4">
+                <form method="POST" enctype="multipart/form-data" action="{% url 'upload_foto_evento' evento.id %}">
+                    {% csrf_token %}
+
+                    <input type="file"
+                           name="imagem"
+                           accept="image/*"
+                           capture="environment"
+                           class="form-control mb-3">
+
+                    <button class="btn btn-vibe">
+                        Enviar foto
+                    </button>
+                </form>
+            </div>
+            {% endif %}
+
+            {% if fotos %}
+            <div id="carouselFotos" class="carousel slide mb-5" data-bs-ride="carousel">
+                <div class="carousel-inner">
+                    {% for foto in fotos %}
+                    <div class="carousel-item {% if forloop.first %}active{% endif %}">
+                        <img src="{{ foto.imagem.url }}" class="d-block w-100">
+                    </div>
+                    {% endfor %}
+                </div>
+
+                <button class="carousel-control-prev" type="button" data-bs-target="#carouselFotos" data-bs-slide="prev">
+                    <span class="carousel-control-prev-icon"></span>
+                </button>
+
+                <button class="carousel-control-next" type="button" data-bs-target="#carouselFotos" data-bs-slide="next">
+                    <span class="carousel-control-next-icon"></span>
+                </button>
+            </div>
+            {% else %}
+                <p class="text-secondary mb-5">Nenhuma foto enviada ainda.</p>
+            {% endif %}
+
+            <h4 class="section-title">💬 Comentários</h4>
+
+            {% for comentario in comentarios %}
+                <div class="comentario-card">
+                    <div class="comentario-user">{{ comentario.usuario.username }}</div>
+                    <div class="comentario-data mb-2">{{ comentario.criado_em|date:"d/m/Y H:i" }}</div>
+                    {{ comentario.texto }}
+                </div>
+            {% empty %}
+                <p class="text-secondary">Nenhum comentário ainda.</p>
+            {% endfor %}
+
+            {% if user.is_authenticated %}
+            <div class="upload-box mt-4">
+                <form method="POST" action="{% url 'comentar_evento' evento.id %}">
+                    {% csrf_token %}
+
+                    <textarea name="texto"
+                              rows="3"
+                              maxlength="500"
+                              class="form-control mb-3"
+                              placeholder="Compartilhe sua experiência no evento..."></textarea>
+
+                    <button type="submit" class="btn btn-vibe">
+                        Enviar comentário
+                    </button>
+                </form>
+            </div>
+            {% else %}
+                <p class="text-secondary mt-4">
+                    Faça login para comentar.
+                </p>
+            {% endif %}
+
+        </div>
+    </div>
+</div>
+
+{% endblock %}
