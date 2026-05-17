@@ -15,6 +15,8 @@ from .models import Comentario
 from .forms import ComentarioForm
 from django.views.decorators.http import require_POST
 from .models import FotoEvento
+import requests
+from datetime import datetime
 
 def mapa_eventos(request):
     eventos = Evento.objects.filter(status='PUBL')
@@ -170,6 +172,9 @@ def comentar_evento(request, evento_id):
 
 from django.shortcuts import get_object_or_404
 
+import requests
+from datetime import datetime
+
 def detalhe_evento(request, evento_id):
     evento = get_object_or_404(Evento, id=evento_id)
 
@@ -182,11 +187,50 @@ def detalhe_evento(request, evento_id):
         if request.user.is_staff or request.user == evento.criado_por:
             pode_enviar_foto = True
 
+    clima = None
+
+    try:
+        lat = evento.localizacao.y
+        lon = evento.localizacao.x
+
+        api_key = 'e49f82374eef92fa220953b1644f6b2d'
+
+        url = f'https://api.openweathermap.org/data/2.5/forecast?lat={lat}&lon={lon}&appid={api_key}&units=metric&lang=pt_br'
+
+        response = requests.get(url, timeout=5)
+        dados = response.json()
+
+        data_evento = evento.data_evento.date()
+
+        for item in dados['list']:
+            dt = datetime.fromtimestamp(item['dt'])
+
+            if dt.date() == data_evento:
+                clima = {
+                    'temperatura': round(item['main']['temp']),
+                    'descricao': item['weather'][0]['description'].capitalize(),
+                    'icone': item['weather'][0]['icon']
+                }
+                break
+
+        if not clima:
+            clima = {
+                'erro': 'Sem previsão disponível para essa data.'
+            }
+
+    except Exception as e:
+        print("ERRO CLIMA:", e)
+
+        clima = {
+            'erro': 'Não foi possível obter informações sobre o clima.'
+        }
+
     context = {
         'evento': evento,
         'comentarios': comentarios,
         'fotos': fotos,
-        'pode_enviar_foto': pode_enviar_foto
+        'pode_enviar_foto': pode_enviar_foto,
+        'clima': clima
     }
 
     return render(request, 'eventos/detalhe_evento.html', context)
