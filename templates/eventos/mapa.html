@@ -170,7 +170,13 @@
             </div>
         </div>
         
-
+        <button onclick="window.alternarTemaManual()" 
+            class="btn btn-light shadow-sm btn-tema-toggle" 
+            style="position: absolute; bottom: 85px; right: 20px; z-index: 1000; border-radius: 50%; width: 50px; height: 50px; display: flex; align-items: center; justify-content: center;"
+            title="Alternar Tema Noturno">
+           <i class="bi bi-moon-stars-fill modo-escuro-icon" style="font-size: 1.3rem; color: #7DACFD;"></i>
+           <i class="bi bi-sun-fill modo-claro-icon d-none" style="font-size: 1.3rem; color: #ffb100;"></i>
+         </button>
 
         <div id="map">
             <button onclick="window.localizarUsuario()" 

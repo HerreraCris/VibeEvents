@@ -1,45 +1,45 @@
-
 {% extends 'base.html' %}
 {% load static %}
 
 {% block content %}
 <div class="container d-flex align-items-center justify-content-center" style="min-height: 90vh; padding: 20px 0;">
-    <div class="card shadow-sm border-0" style="width: 100%; max-width: 450px;">
-        <div class="card-body p-4">
-            <h2 class="text-center fw-bold mb-2">Criar sua Vibe</h2>
-            <p class="text-center text-muted small mb-4">Cadastre-se para favoritar e sugerir eventos</p>
+    <div class="vibe-card-auth text-white p-4 shadow-sm" style="width: 100%; max-width: 450px;">
+        <h2 class="text-center fw-bold mb-2">Criar sua Vibe</h2>
+        <p class="text-center text-muted small mb-4">Cadastre-se para favoritar e sugerir eventos</p>
+        
+        <form method="post">
+            {% csrf_token %}
             
-            <form method="post">
-                {% csrf_token %}
-                
-                {% for field in form %}
-                    <div class="mb-3">
-                        <label class="form-label small text-muted">{{ field.label }}</label>
-                        {{ field }}
-                        {% if field.errors %}
-                            {% for error in field.errors %}
-                                <div class="text-danger x-small" style="font-size: 0.75rem;">{{ error }}</div>
-                            {% endfor %}
-                        {% endif %}
-                        {% if field.help_text %}
-                            <div class="form-text x-small text-muted" style="font-size: 0.7rem;">{{ field.help_text|safe }}</div>
-                        {% endif %}
-                    </div>
-                {% endfor %}
+            {% for field in form %}
+                <div class="mb-3">
+                    <label class="form-label small text-muted">{{ field.label }}</label>
+                    {{ field }}
+                    {% if field.errors %}
+                        {% for error in field.errors %}
+                            <div class="text-danger x-small" style="font-size: 0.75rem;">{{ error }}</div>
+                        {% endfor %}
+                    {% endif %}
+                    {% if field.help_text %}
+                        <div class="form-text x-small text-muted" style="font-size: 0.7rem; color: #94a3b8 !important;">{{ field.help_text|safe }}</div>
+                    {% endif %}
+                </div>
+            {% endfor %}
 
-                <button type="submit" class="btn btn-success btn-lg w-100 shadow-sm mt-3 mb-3">
-                    Finalizar Cadastro
-                </button>
-            </form>
+            <button type="submit" class="btn btn-success btn-lg w-100 shadow-sm mt-3 mb-3" style="border-radius: 10px; font-weight: bold;">
+                Finalizar Cadastro
+            </button>
+        </form>
 
-            <div class="text-center mt-3 border-top pt-3">
-                <p class="text-muted small">Já possui cadastro? <a href="{% url 'login' %}" class="text-decoration-none fw-bold">Entrar agora</a></p>
-            </div>
+        <div class="text-center mt-3 border-top border-secondary pt-3">
+            <p class="text-muted small">Já possui cadastro?
+                <a href="{% url 'login' %}" class="text-decoration-none fw-bold" style="color: #7DACFD;">Entrar agora</a>
+            </p>
         </div>
     </div>
 </div>
 
 <style>
+    /* Sobrescreve dinamicamente as classes dos inputs gerados pelo Django form */
     input[type="text"], input[type="password"], input[type="email"] {
         display: block;
         width: 100%;
@@ -47,13 +47,34 @@
         font-size: 1rem;
         font-weight: 400;
         line-height: 1.5;
-        color: #212529;
-        background-color: #fff;
-        background-clip: padding-box;
-        border: 1px solid #ced4da;
+        color: #ffffff !important;
+        background-color: #0f1523 !important;
+        border: 1px solid #2b3448 !important;
         appearance: none;
         border-radius: 0.375rem;
-        transition: border-color .15s ease-in-out,box-shadow .15s ease-in-out;
+        transition: border-color .15s ease-in-out, box-shadow .15s ease-in-out;
+    }
+    input[type="text"]:focus, input[type="password"]:focus, input[type="email"]:focus {
+        border-color: #7DACFD !important;
+        box-shadow: 0 0 0 0.25rem rgba(125, 172, 253, 0.25) !important;
+        outline: none;
+    }
+
+    .vibe-card-auth label.form-label {
+        color: #e2e8f0 !important; /* Labels principais bem visíveis */
+    }
+    .vibe-card-auth .form-text, 
+    .vibe-card-auth .x-small,
+    .vibe-card-auth p.text-muted {
+        color: #94a3b8 !important; 
+    }
+
+    /* Lista de requisitos da senha (.helptext ou tags ul/li do Django) */
+    .vibe-card-auth ul, 
+    .vibe-card-auth li {
+        color: #cbd5e1 !important; 
+        font-size: 0.8rem;
+        margin-top: 4px;
     }
 </style>
-{% endblock %}
+{% endblock %}  

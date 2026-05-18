@@ -207,3 +207,52 @@ h6.text-muted {
     padding: 4px 8px;
     border-radius: 5px;
 }
+
+/* --- DETECÇÃO AUTOMÁTICA DE DARK MODE (US-EV-18) --- */
+@media (prefers-color-scheme: dark) {
+    :root {
+        --bg-dark: #05070a; /* Escurece ligeiramente o fundo geral */
+        --vibe-card: #0d121f; /* Cartões com contraste adaptado */
+        --vibe-border: #1a2234;
+    }
+
+    /* Inverte suavemente controles nativos do Leaflet (Zoom, Atribuições) para combinar com o tema */
+    .leaflet-control-zoom-in,
+    .leaflet-control-zoom-out,
+    .leaflet-bar a {
+        background-color: #121826 !important;
+        color: #FFFFFF !important;
+        border-color: #222b3e !important;
+    }
+
+    .leaflet-container {
+        background: #0b0f19 !important;
+    }
+
+    /* Estilização interna dos popups para não contrastar agressivamente */
+    .leaflet-popup-content-wrapper, .leaflet-popup-tip {
+        background: #121826 !important;
+        color: #e2e8f0 !important;
+        border: 1px solid #222b3e;
+        box-shadow: 0 10px 25px rgba(0,0,0,0.5);
+    }
+    
+    .map-popup {
+        color: #e2e8f0 !important;
+    }
+}
+
+
+/* Controle visual do botão de tema */
+body.dark-mode-active .btn-tema-toggle {
+    background-color: #121826 !important;
+    border-color: #222b3e !important;
+}
+
+body.dark-mode-active .modo-escuro-icon {
+    display: none !important;
+}
+
+body.dark-mode-active .modo-claro-icon {
+    display: block !important;
+}

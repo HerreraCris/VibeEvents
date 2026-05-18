@@ -46,12 +46,44 @@
         }
 
         leafletMap = L.map(containerId).setView([-10.18, -48.33], 13); 
-        
-    // Substituindo o bloco do Stadia Maps pelo o do OpenStreetMap
-        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+
+        // --- GERENCIAMENTO DINÂMICO DE TEMA (US-EV-18) ---
+        let temaSalvo = localStorage.getItem('vibe_theme');
+        let isDarkMode = temaSalvo === 'dark' || 
+            (!temaSalvo && window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches);
+
+        let tileLayerUrl = isDarkMode 
+            ? 'https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png'
+            : 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png';
+            
+        let tileAttribution = isDarkMode 
+            ? '© OpenStreetMap contributors, © CARTO' 
+            : '© OpenStreetMap contributors';
+
+        L.tileLayer(tileLayerUrl, {
             maxZoom: 19,
-            attribution: '© OpenStreetMap contributors'
+            attribution: tileAttribution
         }).addTo(leafletMap);
+
+        document.body.classList.toggle('dark-mode-active', isDarkMode);
+
+        // --- UNIFICAÇÃO DOS LISTENERS DE TEMA ---
+        if (window.matchMedia) {
+            window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', e => {
+                if (!localStorage.getItem('vibe_theme')) {
+                    location.reload(); 
+                } else if (typeof filterChange === "function") { 
+                    filterChange(); 
+                }
+            });
+        }
+
+        // --- FUNÇÃO GLOBAL DO BOTÃO DE INTERNVEÇÃO MANUAL ---
+        window.alternarTemaManual = () => {
+            let atualmenteEscuro = document.body.classList.contains('dark-mode-active');
+            localStorage.setItem('vibe_theme', atualmenteEscuro ? 'light' : 'dark');
+            location.reload(); 
+        };
 
         // --- CONFIGURAÇÃO DE EVENTOS DE LOCALIZAÇÃO (GPS) ---
         leafletMap.on('locationfound', (e) => {
@@ -101,13 +133,12 @@
                 const marker = L.marker([coords[1], coords[0]], { icon: markerIcon }); 
 
                 const addressId = `addr-${Math.random().toString(36).substr(2, 9)}`; 
-                // LÓGICA DE RECOMENDAÇÃO PERSONALIZADA
                 const interesses = window.VIBE_INTERESSES || [];
                 if (interesses.length > 0) {
                     if (!interesses.includes(evento.categoria)) {
-                        marker.setOpacity(0.4); // Esmaece o que não é interesse
+                        marker.setOpacity(0.4); 
                     } else {
-                        marker.setZIndexOffset(1000); // Traz os favoritos para a frente
+                        marker.setZIndexOffset(1000); 
                     }
                 }
                 marker.eventoData = evento; 
@@ -115,51 +146,47 @@
                 const getPopupContent = () => {
                     const favs = window.getFavoritos();
                     const isFav = favs.includes(evento.id.toString());
-
                     const proximidadeHtml = obterInfoProximidade([coords[1], coords[0]]);
-                return `
-                    <div class="map-popup" style="color: #0b0f19; min-width: 220px;">
-                        <div style="display: flex; justify-content: space-between; align-items: flex-start;">
-                            <h5 style="margin: 0; font-weight: bold;">${evento.nome}</h5>
-                            <button class="btn-favorito ${isFav ? 'is-fav' : ''}" onclick="window.gerenciarFavoritoMapa('${evento.id}')">
-                                <i class="bi ${isFav ? 'bi-heart-fill' : 'bi-heart'}"></i>
-                            </button>
-                        </div>
-                        <div style="margin: 8px 0 5px; font-size: 0.9rem;">
-                            🗓️ <b>${new Date(evento.data_evento).toLocaleDateString('pt-BR')}</b>
-                        </div>
-                        
-                        ${proximidadeHtml}
-
-                        <p style="font-size: 0.75rem; color: #666; border-top: 1px solid #eee; padding-top: 8px; margin-top: 5px;">
-                            <b>Endereço:</b><br><span id="${addressId}">Carregando...</span>
-                        </p>
-                        <!-- ... botão ingresso ... -->
-                        <hr>
-                        <div style="margin-top: 10px;">
-                            <h6 style="font-size: 0.9rem;">Comentários</h6>
-
-                            <div id="comentarios-${evento.id}" style="max-height: 150px; overflow-y: auto; margin-bottom: 8px; font-size: 0.8rem;">
-                                ${(evento.comentarios || []).map(c => `
-                                    <div style="border-bottom:1px solid #ddd; padding:6px 0;">
-                                        <b>${c.usuario}</b>
-                                        <small style="display:block; color:#777;">${c.data}</small>
-                                        ${c.texto}
-                                    </div>
-                                `).join('')}
+                    return `
+                        <div class="map-popup" style="color: #0b0f19; min-width: 220px;">
+                            <div style="display: flex; justify-content: space-between; align-items: flex-start;">
+                                <h5 style="margin: 0; font-weight: bold;">${evento.nome}</h5>
+                                <button class="btn-favorito ${isFav ? 'is-fav' : ''}" onclick="window.gerenciarFavoritoMapa('${evento.id}')">
+                                    <i class="bi ${isFav ? 'bi-heart-fill' : 'bi-heart'}"></i>
+                                </button>
                             </div>
+                            <div style="margin: 8px 0 5px; font-size: 0.9rem;">
+                                🗓️ <b>${new Date(evento.data_evento).toLocaleDateString('pt-BR')}</b>
+                            </div>
+                            
+                            ${proximidadeHtml}
+
+                            <p style="font-size: 0.75rem; color: #666; border-top: 1px solid #eee; padding-top: 8px; margin-top: 5px;">
+                                <b>Endereço:</b><br><span id="${addressId}">Carregando...</span>
+                            </p>
+                            <hr>
+                            <div style="margin-top: 10px;">
+                                <h6 style="font-size: 0.9rem;">Comentários</h6>
+                                <div id="comentarios-${evento.id}" style="max-height: 150px; overflow-y: auto; margin-bottom: 8px; font-size: 0.8rem;">
+                                    ${(evento.comentarios || []).map(c => `
+                                        <div style="border-bottom:1px solid #ddd; padding:6px 0;">
+                                            <b>${c.usuario}</b>
+                                            <small style="display:block; color:#777;">${c.data}</small>
+                                            ${c.texto}
+                                        </div>
+                                    `).join('')}
+                                </div>
                                 <hr>
                                 <a href="/evento/${evento.id}/" class="btn btn-outline-primary btn-sm w-100 mt-2">
                                     Ver detalhes do evento
                                 </a>
-                        </div>
-                    </div>`;
+                            </div>
+                        </div>`;
                 };
                 marker.bindPopup(getPopupContent, { maxWidth: 300 });
 
                 marker.on('popupopen', function() {
                     marker.setPopupContent(getPopupContent());
-                    
                     fetch(`https://nominatim.openstreetmap.org/reverse?format=jsonv2&lat=${coords[1]}&lon=${coords[0]}`) 
                         .then(r => r.json()) 
                         .then(data => {
@@ -173,7 +200,6 @@
             }
         });
     };
-
     window.aplicarFiltros = (categoriaSelecionada, apenasSolidarios, apenasFavoritos = false) => {
         if (!leafletMap) return;
         const favs = window.getFavoritos();
