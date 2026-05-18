@@ -7,9 +7,9 @@
     <title>Sucesso | VibeEvents</title>
     <link rel="stylesheet" href="{% static 'bootstrap-5.3.8/css/bootstrap.min.css' %}">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
-    <style>
+<style>
         body { 
-            background-color: #0b0f19; 
+            background-color: #0b0f19;
             color: #e2e8f0; 
             height: 100vh; 
             display: flex; 
@@ -40,6 +40,7 @@
             border: 2px solid #7DACFD;
         }
         .vibe-accent { color: #7DACFD; }
+        
         .btn-home {
             background: #7DACFD;
             color: #0b0f19;
@@ -48,15 +49,26 @@
             padding: 12px 30px;
             text-decoration: none;
             transition: 0.3s;
+            display: inline-block;
         }
         .btn-home:hover {
             background: #93b9ff;
             transform: translateY(-2px);
         }
+        
+        .success-card p.text-muted {
+            color: #cbd5e1 !important; 
+            font-size: 1rem;
+            line-height: 1.5;
+        }
         .countdown {
-            font-size: 0.8rem;
-            color: #94a3b8;
-            margin-top: 20px;
+            font-size: 0.85rem;
+            color: #94a3b8 !important; 
+            margin-top: 25px;
+        }
+        #timer {
+            color: #7DACFD !important;
+            font-weight: bold;
         }
     </style>
 </head>
