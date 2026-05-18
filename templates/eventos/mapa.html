@@ -13,10 +13,47 @@
     <link rel="stylesheet" href="{% static 'css/mapa.css' %}" />
 
     <style>
-        #main-container { display: flex; height: calc(100vh - 110px); overflow: hidden; }
-        #sidebar { width: 350px; background: #121826; border-right: 1px solid #222b3e; padding: 20px; z-index: 1000; overflow-y: auto; }
-        #map { flex-grow: 1; height: 100%; position: relative; }
+        #main-container { 
+                display: flex; 
+                height: calc(100vh - 110px); 
+                overflow: hidden; 
+                position: relative; /* Para o botão toggle se posicionar em relação a ele */
+        }
+        #map, #lista-eventos-container { 
+                flex-grow: 1; 
+                height: 100%; 
+        }
+        #lista-eventos-container { 
+            flex-grow: 1; 
+            width: 0; /* Isso força o flex-grow a calcular corretamente o espaço restante */
+            height: 100%; 
+            overflow-y: auto; 
+            background: #0b0f19;
+        }
+        .view-toggle-container {
+            position: absolute;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 2000;
+        }
+        #sidebar { 
+                width: 350px; 
+                min-width: 350px; 
+                max-width: 350px; 
+                background: #121826; 
+                border-right: 1px solid #222b3e; 
+                padding: 20px; 
+                z-index: 1000; 
+                overflow-y: auto; 
+                height: 100%;
+        }
+
+        #cards-wrapper { padding: 10px; }
+
         
+        body { overflow: hidden; height: 100vh; }
+
         .navbar-vibe { background: #0b0f19; border-bottom: 1px solid #222b3e; padding: 10px 25px; height: 110px; }        .filter-badge { cursor: pointer; transition: 0.3s; border: 1px solid #222b3e; padding: 8px 15px; border-radius: 20px; font-size: 0.85rem; margin-bottom: 10px; display: inline-block; text-decoration: none; color: white; }
         .filter-badge:hover, .filter-badge.active { background: #7DACFD; color: #0b0f19; border-color: #7DACFD; }
  
@@ -58,25 +95,69 @@
     <script src="{% static 'bootstrap-5.3.8/js/bootstrap.bundle.min.js' %}"></script>
 </head>
 <body>
-
     <nav class="navbar navbar-vibe d-flex align-items-center justify-content-between">
         <div class="d-flex align-items-center">
-            <!-- Botão Menu Mobile -->
             <button class="btn btn-outline-light d-md-none me-3" type="button" data-bs-toggle="offcanvas" data-bs-target="#offcanvasSidebar">
                 <i class="bi bi-list" style="font-size: 1.5rem;"></i>
             </button>
             <img src="{% static 'img/vibeevents-icon.png' %}" alt="Logo" style="height: 70px; width: auto" class="me-3">
         </div>
-        <a href="{% url 'sugerir_evento' %}" class="btn btn-outline-light btn-sm rounded-pill d-none d-sm-block">
-            <i class="bi bi-plus-circle me-1"></i> Sugerir Evento
-        </a>
-    </nav>
 
+        <div class="d-flex align-items-center gap-2 gap-md-3">
+            {% if user.is_authenticated %}
+                <a href="{% url 'editar_perfil' %}" class="text-white text-decoration-none d-flex align-items-center" style="min-height: 44px;">
+                    <i class="bi bi-person-circle fs-5 me-1"></i>
+                    <span class="small fw-bold d-none d-sm-inline">{{ user.username }}</span>
+                </a>
+
+                <form action="{% url 'logout' %}" method="post" class="m-0">
+                    {% csrf_token %}
+                    <button type="submit" class="btn btn-sm btn-outline-danger border-0" style="min-height: 44px;">Sair</button>
+                </form>
+            {% else %}
+                <a href="{% url 'login' %}?next={{ request.path }}" class="btn btn-primary btn-sm rounded-pill px-3 d-flex align-items-center" style="min-height: 44px;">
+                    Entrar
+                </a>
+                <a href="{% url 'registro' %}" class="btn btn-outline-light btn-sm rounded-pill px-3 d-none d-sm-flex align-items-center" style="min-height: 44px;">
+                    Criar Conta
+                </a>
+            {% endif %}
+            
+            <a href="{% url 'sugerir_evento' %}" class="btn btn-outline-light btn-sm rounded-pill d-flex align-items-center" style="min-height: 44px;">
+                <i class="bi bi-plus-circle me-md-1"></i>
+                <span class="d-none d-md-inline">Sugerir Evento</span>
+            </a>
+        </div>
+    </nav>
 <div id="main-container">
         <!-- Sidebar Desktop -->
         <aside id="sidebar" class="d-none d-md-block">
             {% include 'eventos/sidebar_content.html' %}
         </aside>
+
+        <div id="lista-eventos-container" class="d-none">
+            <div class="container-fluid py-4">
+                <div class="d-flex justify-content-between align-items-center mb-4 px-3">
+                    <h3 class="text-white">Eventos em Palmas</h3>
+                    <select class="form-select w-auto bg-dark text-white border-secondary" id="ordenacao-lista">
+                        <option value="data">Por Data</option>
+                        <option value="distancia">Mais Próximos</option>
+                    </select>
+                </div>
+                <div id="cards-wrapper" class="row g-3 px-2">
+                    </div>
+            </div>
+        </div>
+        <div class="view-toggle-container">
+            <div class="btn-group shadow" role="group" aria-label="Alternar Visualização">
+                <button type="button" id="view-map-btn" class="btn btn-primary active" onclick="toggleView('map')">
+                    <i class="bi bi-map me-1"></i> Mapa
+                </button>
+                <button type="button" id="view-list-btn" class="btn btn-primary" onclick="toggleView('list')">
+                    <i class="bi bi-list-ul me-1"></i> Lista
+                </button>
+            </div>
+        </div>
 
         <!-- Sidebar Mobile (Offcanvas) -->
         <div class="offcanvas offcanvas-start bg-dark text-white" tabindex="-1" id="offcanvasSidebar" style="width: 300px;">
@@ -88,6 +169,14 @@
                 {% include 'eventos/sidebar_content.html' %}
             </div>
         </div>
+        
+        <button onclick="window.alternarTemaManual()" 
+            class="btn btn-light shadow-sm btn-tema-toggle" 
+            style="position: absolute; bottom: 85px; right: 20px; z-index: 1000; border-radius: 50%; width: 50px; height: 50px; display: flex; align-items: center; justify-content: center;"
+            title="Alternar Tema Noturno">
+           <i class="bi bi-moon-stars-fill modo-escuro-icon" style="font-size: 1.3rem; color: #7DACFD;"></i>
+           <i class="bi bi-sun-fill modo-claro-icon d-none" style="font-size: 1.3rem; color: #ffb100;"></i>
+         </button>
 
         <div id="map">
             <button onclick="window.localizarUsuario()" 
@@ -108,15 +197,22 @@
     <script src="https://unpkg.com/leaflet-control-geocoder/dist/Control.Geocoder.js"></script>
     <script src="{% static 'js/mapa.js' %}?v={% now 'U' %}"></script>
     <script>
+        window.USER_AUTHENTICATED = {{ user.is_authenticated|yesno:"true,false" }};
+        window.LOGIN_URL = "{% url 'login' %}?next=" + window.location.pathname;
+
         window.getFavoritos = window.getFavoritos || function() {
             return JSON.parse(localStorage.getItem('vibe_favs')) || [];
         };
 
         let currentCategory = 'ALL';
         let apenasFavoritos = false;
-
         function toggleFavorito(eventoId) {
-            // Chama a função única do mapa.js
+            if (!window.USER_AUTHENTICATED) {
+                alert("Crie uma conta ou faça login para favoritar este evento!");
+                window.location.href = window.LOGIN_URL;
+                return;
+            }
+            
             if (typeof window.gerenciarFavoritoMapa === 'function') {
                 window.gerenciarFavoritoMapa(eventoId);
             }
