@@ -223,3 +223,7 @@ def alternar_presenca_evento(request, evento_id):
         'confirmado': confirmado,
         'total_participantes': evento.total_participantes
     })
+
+
+def landing_page(request):
+    return render(request, 'core/landing.html')
