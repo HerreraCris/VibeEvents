@@ -3,7 +3,8 @@ from . import views
 from .views import EventoListAPIView
 
 urlpatterns = [
-    path('', views.mapa_eventos, name='mapa_eventos'),
+    path('', views.landing_page, name='landing'),
+    path('mapa/', views.mapa_eventos, name='mapa_eventos'),
     path('sugerir/', views.sugerir_evento_publico, name='sugerir_evento'), 
     path('curadoria/novo/', views.cadastrar_evento_curadoria, name='curadoria_novo'),
     path('sugestao-enviada/', views.sugestao_sucesso, name='sugestao_sucesso'),

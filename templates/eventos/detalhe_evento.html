@@ -147,11 +147,29 @@
         object-fit: cover;
         border-radius: 14px;
     }
+
+        .evento-info strong{
+        color:#fff;
+    }
+
+    .text-success{
+        color:#22c55e !important;
+    }
+
+    .btn-vibe{
+        transition:.25s ease;
+    }
+
+    .btn-vibe:hover{
+        transform:translateY(-2px);
+        box-shadow:0 10px 25px rgba(125,172,253,.18);
+}
+
 </style>
 
 <div class="container py-5">
 
-    <a href="/" class="btn btn-outline-light mb-4 px-4 rounded-pill">
+    <a href="/mapa/" class="btn btn-outline-light mb-4 px-4 rounded-pill">
         ← Voltar ao mapa
     </a>
 
@@ -171,6 +189,62 @@
                         <strong>📍 Local</strong><br>
                         {{ evento.nome_local }}
                     </div>
+                </div>
+                                <!-- INFO EXTRA -->
+                <div class="row g-3 mb-4">
+
+                    {% if evento.is_beneficente %}
+                    <div class="col-md-6">
+
+                        <div class="evento-info h-100">
+
+                            <strong class="text-success">
+                                💚 Evento Beneficente
+                            </strong>
+
+                            <br><br>
+
+                            <span class="text-secondary">
+                                Este evento possui finalidade beneficente ou arrecadatória.
+                            </span>
+
+                        </div>
+
+                    </div>
+                    {% endif %}
+
+                    {% if evento.link_externo %}
+                    <div class="col-md-6">
+
+                        <div class="evento-info h-100 d-flex flex-column justify-content-between">
+
+                            <div>
+
+                                <strong>
+                                    🎟️ Ingresso / Inscrição
+                                </strong>
+
+                                <br><br>
+
+                                <span class="text-secondary">
+                                    Acesse o link oficial para participar do evento.
+                                </span>
+
+                            </div>
+
+                            <a href="{{ evento.link_externo }}"
+                            target="_blank"
+                            class="btn btn-vibe mt-3">
+
+                                Abrir link do evento
+
+                            </a>
+
+                        </div>
+
+                    </div>
+                    {% endif %}
+
                 </div>
 
                 <div class="col-md-6">
