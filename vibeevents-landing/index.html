@@ -1,0 +1,521 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>VibeEvents | Descubra Eventos em Palmas</title>
+    <link rel="stylesheet" href="static/bootstrap-5.3.8/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css"/>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg:       #0b0e1a;
+            --bg2:      #0f1220;
+            --bg3:      #131726;
+            --border:   rgba(255,255,255,.06);
+            --blue:     #4d8ef8;
+            --blue-soft:#7DACFD;
+            --text-muted: #64748b;
+            --text-soft:  #94a3b8;
+        }
+        *, *::before, *::after { margin:0; padding:0; box-sizing:border-box; }
+        html { scroll-behavior:smooth; }
+        body {
+            background: var(--bg);
+            color: #fff;
+            font-family: 'Inter', sans-serif;
+            overflow-x: hidden;
+        }
+        a { text-decoration:none; }
+        /* ── NAVBAR ── */
+        .navbar-vibe {
+            position: fixed;
+            top: 0; width: 100%;
+            z-index: 1000;
+            padding: 18px 0;
+            transition: .3s;
+        }
+        .navbar-scrolled {
+            background: rgba(11,14,26,.85);
+            backdrop-filter: blur(16px);
+            border-bottom: 1px solid var(--border);
+        }
+        .logo { height: 44px; }
+        /* ── BUTTONS ── */
+        .btn-vibe {
+            background: var(--blue-soft);
+            color: #07101f;
+            border: none;
+            border-radius: 14px;
+            padding: 12px 28px;
+            font-weight: 700;
+            font-size: .9rem;
+            transition: .25s;
+            box-shadow: 0 0 24px rgba(125,172,253,.2), 0 8px 24px rgba(125,172,253,.12);
+        }
+        .btn-vibe:hover {
+            transform: translateY(-2px);
+            background: #93bbff;
+            color: #07101f;
+            box-shadow: 0 0 32px rgba(125,172,253,.35);
+        }
+        .btn-outline-vibe {
+            border: 1px solid rgba(255,255,255,.14);
+            color: #fff;
+            border-radius: 14px;
+            padding: 12px 26px;
+            font-size: .9rem;
+            transition: .25s;
+            background: rgba(255,255,255,.03);
+        }
+        .btn-outline-vibe:hover {
+            background: rgba(255,255,255,.07);
+            border-color: rgba(255,255,255,.25);
+            color: #fff;
+        }
+        /* ── HERO ── */
+        .hero {
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            position: relative;
+            overflow: hidden;
+            padding-top: 110px;
+            padding-bottom: 60px;
+        }
+        .hero::before {
+            content: '';
+            position: absolute;
+            width: 800px; height: 800px;
+            background: radial-gradient(circle, rgba(77,142,248,.18) 0%, transparent 65%);
+            top: -300px; right: -200px;
+            pointer-events: none;
+        }
+        .hero::after {
+            content: '';
+            position: absolute;
+            width: 600px; height: 600px;
+            background: radial-gradient(circle, rgba(29,78,216,.1) 0%, transparent 65%);
+            bottom: -200px; left: -150px;
+            pointer-events: none;
+        }
+        .hero-eyebrow {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            background: rgba(77,142,248,.1);
+            border: 1px solid rgba(77,142,248,.25);
+            color: var(--blue-soft);
+            padding: 6px 16px;
+            border-radius: 999px;
+            font-size: .8rem;
+            font-weight: 600;
+            letter-spacing: .04em;
+            margin-bottom: 28px;
+        }
+        .eyebrow-dot {
+            width: 7px; height: 7px;
+            background: #22c55e;
+            border-radius: 50%;
+            animation: pulse 1.6s infinite;
+        }
+        .hero-title {
+            font-size: clamp(2.6rem, 5vw, 4.6rem);
+            font-weight: 900;
+            line-height: 1.06;
+            letter-spacing: -.02em;
+            margin-bottom: 24px;
+        }
+        .hero-title span { color: var(--blue-soft); }
+        .hero-sub {
+            color: var(--text-soft);
+            font-size: 1.05rem;
+            line-height: 1.85;
+            max-width: 520px;
+            margin-bottom: 40px;
+        }
+        .hero-buttons {
+            display: flex;
+            gap: 14px;
+            flex-wrap: wrap;
+        }
+        /* view-toggle hint */
+        .view-toggle-hint {
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            margin-top: 32px;
+            color: var(--text-muted);
+            font-size: .82rem;
+        }
+        .view-pill {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            background: var(--bg3);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 5px 11px;
+            font-size: .78rem;
+            font-weight: 600;
+            color: var(--text-soft);
+        }
+        .view-pill.active {
+            background: rgba(77,142,248,.12);
+            border-color: rgba(77,142,248,.3);
+            color: var(--blue-soft);
+        }
+        /* ── MAP SIDE ── */
+        .hero-map-wrapper {
+            position: relative;
+            z-index: 2;
+        }
+        .map-container {
+            height: 600px;
+            border-radius: 28px;
+            overflow: hidden;
+            border: 1px solid var(--border);
+            box-shadow:
+                0 0 0 1px rgba(77,142,248,.06),
+                0 30px 80px rgba(0,0,0,.55),
+                0 0 70px rgba(77,142,248,.1);
+            position: relative;
+            z-index: 1;
+        }
+        #landing-map { width:100%; height:100%; }
+        .map-overlay {
+            position: absolute; inset:0;
+            pointer-events: none; z-index: 2;
+            background: linear-gradient(to top, rgba(11,14,26,.7) 0%, transparent 28%);
+        }
+        /* live badge */
+        .live-badge {
+            position: absolute;
+            top: 20px; left: 20px;
+            z-index: 40;
+            background: rgba(11,14,26,.9);
+            border: 1px solid rgba(255,255,255,.08);
+            backdrop-filter: blur(12px);
+            padding: 8px 16px;
+            border-radius: 999px;
+            display: flex; align-items: center; gap: 9px;
+            font-size: .8rem; font-weight: 600;
+            box-shadow: 0 8px 24px rgba(0,0,0,.3);
+        }
+        .live-dot {
+            width: 9px; height: 9px;
+            background: #22c55e;
+            border-radius: 50%;
+            animation: pulse 1.6s infinite;
+        }
+        @keyframes pulse {
+            0%   { transform:scale(1);   opacity:1; }
+            50%  { transform:scale(1.55);opacity:.45; }
+            100% { transform:scale(1);   opacity:1; }
+        }
+        /* floating cards */
+        .floating-card {
+            position: absolute;
+            z-index: 50;
+            background: rgba(11,14,26,.78);
+            backdrop-filter: blur(18px);
+            border: 1px solid rgba(255,255,255,.09);
+            border-radius: 20px;
+            padding: 16px 20px;
+            width: 228px;
+            box-shadow: 0 12px 36px rgba(0,0,0,.4);
+        }
+        .floating-card h6 { font-weight:700; font-size:.9rem; margin-bottom:6px; }
+        .floating-card p  { color:var(--text-soft); font-size:.82rem; margin:0; line-height:1.6; }
+        .card-top    { top:-28px; right:-36px; }
+        .card-bottom { bottom:-22px; left:-28px; }
+        /* ── MODES SECTION ── */
+        .section { padding: 110px 0; position:relative; }
+        .section-label {
+            text-align: center;
+            color: var(--blue-soft);
+            font-size: .78rem;
+            font-weight: 700;
+            letter-spacing: .12em;
+            text-transform: uppercase;
+            margin-bottom: 14px;
+        }
+        .section-title {
+            font-size: clamp(2rem,4vw,2.8rem);
+            font-weight: 800;
+            text-align: center;
+            line-height: 1.15;
+            margin-bottom: 16px;
+        }
+        .section-sub {
+            text-align: center;
+            max-width: 640px;
+            margin: 0 auto 72px;
+            color: var(--text-soft);
+            line-height: 1.8;
+            font-size: .97rem;
+        }
+        /* ── VIEW MODES CARDS ── */
+        .mode-card {
+            background: var(--bg2);
+            border: 1px solid var(--border);
+            border-radius: 24px;
+            padding: 36px 36px 32px;
+            height: 100%;
+            transition: .3s;
+            position: relative;
+            overflow: hidden;
+        }
+        .mode-card::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; right: 0;
+            height: 2px;
+            background: linear-gradient(90deg, transparent, var(--blue-soft), transparent);
+            opacity: 0;
+            transition: .3s;
+        }
+        .mode-card:hover { transform: translateY(-6px); border-color: rgba(125,172,253,.2); }
+        .mode-card:hover::before { opacity: 1; }
+        .mode-icon {
+            width: 64px; height: 64px;
+            border-radius: 18px;
+            background: rgba(77,142,248,.1);
+            border: 1px solid rgba(77,142,248,.15);
+            display: flex; align-items: center; justify-content: center;
+            font-size: 1.8rem;
+            margin-bottom: 24px;
+        }
+        .mode-badge {
+            display: inline-block;
+            background: rgba(77,142,248,.12);
+            border: 1px solid rgba(77,142,248,.2);
+            color: var(--blue-soft);
+            font-size: .72rem;
+            font-weight: 700;
+            letter-spacing: .06em;
+            text-transform: uppercase;
+            padding: 4px 10px;
+            border-radius: 6px;
+            margin-bottom: 16px;
+        }
+        .mode-title { font-size: 1.3rem; font-weight: 700; margin-bottom: 12px; }
+        .mode-text  { color: var(--text-soft); line-height: 1.8; font-size: .92rem; }
+        .mode-features {
+            list-style: none;
+            margin-top: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+        .mode-features li {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            color: var(--text-soft);
+            font-size: .87rem;
+        }
+        .mode-features li::before {
+            content: '';
+            width: 18px; height: 18px;
+            border-radius: 50%;
+            background: rgba(34,197,94,.12);
+            border: 1px solid rgba(34,197,94,.25);
+            flex-shrink: 0;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16' fill='%2322c55e'%3E%3Cpath d='M3 8l3.5 3.5 6.5-7'/%3E%3C/svg%3E");
+            background-size: 12px;
+            background-position: center;
+            background-repeat: no-repeat;
+        }
+        /* ── FEATURES GRID ── */
+        .feature-card {
+            background: linear-gradient(160deg, var(--bg3), var(--bg2));
+            border: 1px solid var(--border);
+            border-radius: 24px;
+            padding: 34px;
+            transition: .3s;
+            height: 100%;
+        }
+        .feature-card:hover {
+            transform: translateY(-6px);
+            border-color: rgba(125,172,253,.2);
+            box-shadow: 0 16px 40px rgba(0,0,0,.3), 0 0 30px rgba(125,172,253,.07);
+        }
+        .feature-icon {
+            width: 60px; height: 60px;
+            border-radius: 16px;
+            background: rgba(77,142,248,.1);
+            border: 1px solid rgba(77,142,248,.12);
+            display: flex; align-items: center; justify-content: center;
+            font-size: 1.6rem;
+            margin-bottom: 22px;
+        }
+        .feature-title { font-size: 1.1rem; font-weight: 700; margin-bottom: 10px; }
+        .feature-text  { color: var(--text-soft); line-height: 1.8; font-size: .9rem; }
+        /* ── CTA ── */
+        .cta-section { padding: 80px 0 120px; }
+        .cta-box {
+            position: relative;
+            overflow: hidden;
+            border-radius: 28px;
+            padding: 80px 60px;
+            background: linear-gradient(135deg, var(--bg3), var(--bg2));
+            border: 1px solid var(--border);
+            text-align: center;
+        }
+        .cta-box::before {
+            content: '';
+            position: absolute;
+            width: 600px; height: 600px;
+            background: radial-gradient(circle, rgba(77,142,248,.15) 0%, transparent 65%);
+            top: -300px; left: 50%;
+            transform: translateX(-50%);
+            pointer-events: none;
+        }
+        .cta-content { position:relative; z-index:2; }
+        .cta-title { font-size: clamp(1.8rem,4vw,2.6rem); font-weight:800; margin-bottom:18px; line-height:1.2; }
+        .cta-sub   { color:var(--text-soft); font-size:.97rem; line-height:1.8; margin-bottom:40px; max-width:560px; margin-left:auto; margin-right:auto; }
+        /* ── FOOTER ── */
+        .footer {
+            padding: 36px 0;
+            border-top: 1px solid var(--border);
+            color: var(--text-muted);
+            font-size: .87rem;
+        }
+        /* ── RESPONSIVE ── */
+        @media(max-width:991px) {
+            .hero { text-align:center; padding-top:130px; }
+            .hero-sub { margin:0 auto 40px; }
+            .hero-buttons { justify-content:center; }
+            .view-toggle-hint { justify-content:center; }
+            .floating-card { display:none; }
+            .map-container { height:460px; margin-top:40px; }
+            .cta-box { padding:60px 30px; }
+        }
+    </style>
+</head>
+<body>
+
+<nav class="navbar navbar-expand-lg navbar-dark navbar-vibe" id="navbar">
+    <div class="container">
+        <a class="navbar-brand" href="#">
+            <img src="static/img/vibeevents-icon.png" class="logo" alt="VibeEvents">
+        </a>
+        <div class="d-flex gap-3 align-items-center">
+            <a href="http://192.168.1.6:8000/usuarios/login/" class="btn btn-outline-vibe">Entrar</a>
+            <a href="http://192.168.1.6:8000/mapa/" class="btn btn-vibe">Explorar Eventos</a>
+        </div>
+    </div>
+</nav>
+
+<section class="hero">
+    <div class="container">
+        <div class="row align-items-center g-5">
+            <div class="col-lg-6" style="position:relative;z-index:2;">
+                <div class="hero-eyebrow">
+                    <span class="eyebrow-dot"></span>
+                    Palmas, Tocantins — AO VIVO
+                </div>
+                <h1 class="hero-title">
+                    Descubra eventos<br>em <span>tempo real</span><br>ao seu redor.
+                </h1>
+                <p class="hero-sub">
+                    Explore festas, shows, cultura e esportes através de um mapa interativo e geolocalizado — ou navegue por lista, como preferir.
+                </p>
+                <div class="hero-buttons">
+                    <a href="http://192.168.1.6:8000/mapa/" class="btn btn-vibe btn-lg">
+                        Ver no Mapa
+                    </a>
+                    <a href="http://192.168.1.6:8000/sugerir/" class="btn btn-outline-vibe btn-lg">
+                        Sugerir Evento
+                    </a>
+                </div>
+                <div class="view-toggle-hint">
+                    <span>Explore por</span>
+                    <span class="view-pill active">🗺️ Mapa</span>
+                    <span style="color:var(--text-muted)">ou</span>
+                    <span class="view-pill">☰ Lista</span>
+                </div>
+            </div>
+            <div class="col-lg-6">
+                <div class="hero-map-wrapper">
+                    <div class="live-badge">
+                        <div class="live-dot"></div>
+                        AO VIVO
+                    </div>
+                    <div class="floating-card card-top">
+                        <h6>📍 Eventos Próximos</h6>
+                        <p>Visualize eventos próximos em tempo real no mapa interativo.</p>
+                    </div>
+                    <div class="floating-card card-bottom">
+                        <h6>🌤️ Clima Inteligente</h6>
+                        <p>Consulte a previsão do tempo antes de sair de casa.</p>
+                    </div>
+                    <div class="map-container">
+                        <div id="landing-map"></div>
+                        <div class="map-overlay"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<section class="section" style="padding-top:60px;">    <div class="container">        <p class="section-label">Duas formas de explorar</p>        <h2 class="section-title">Mapa ou Lista — você escolhe</h2>        <p class="section-sub">            Visualize os eventos do jeito que faz mais sentido para você. Alterne entre mapa geolocalizado e visualização em lista com um clique.        </p>        <div class="row g-4">            <div class="col-md-6">                <div class="mode-card">                    <div class="mode-badge">Modo Mapa</div>                    <div class="mode-icon">🗺️</div>                    <div class="mode-title">Mapa Interativo</div>                    <div class="mode-text">Veja onde cada evento acontece em Palmas em tempo real, com marcadores geolocalizados e filtros por categoria e data.</div>                    <ul class="mode-features">                        <li>Marcadores em tempo real no mapa</li>                        <li>Filtro por categoria e período</li>                        <li>Visualização geolocalizada</li>                    </ul>                </div>            </div>            <div class="col-md-6">                <div class="mode-card">                    <div class="mode-badge">Modo Lista</div>                    <div class="mode-icon">☰</div>                    <div class="mode-title">Visualização em Lista</div>                    <div class="mode-text">Prefere navegar por cards? Alterne para a lista e explore todos os eventos com foto, data, local e botão de acesso rápido.</div>                    <ul class="mode-features">                        <li>Cards com foto de capa</li>                        <li>Data, horário e local visíveis</li>                        <li>Acesso rápido a cada evento</li>                    </ul>                </div>            </div>        </div>    </div></section><section class="section" style="padding-top:60px;">    <div class="container">        <p class="section-label">Funcionalidades</p>        <h2 class="section-title">Tudo que você precisa<br>em um só lugar</h2>        <p class="section-sub">            O VibeEvents combina geolocalização, interação social e inteligência visual para transformar a descoberta de eventos urbanos.        </p>        <div class="row g-4">            <div class="col-md-6 col-lg-4">                <div class="feature-card">                    <div class="feature-icon">📸</div>                    <div class="feature-title">Compartilhamento de Fotos</div>                    <div class="feature-text">Usuários publicam registros visuais diretamente nos eventos.</div>                </div>            </div>            <div class="col-md-6 col-lg-4">                <div class="feature-card">                    <div class="feature-icon">💬</div>                    <div class="feature-title">Interação Social</div>                    <div class="feature-text">Sistema completo de comentários e participação em eventos.</div>                </div>            </div>            <div class="col-md-6 col-lg-4">                <div class="feature-card">                    <div class="feature-icon">🌤️</div>                    <div class="feature-title">Previsão do Tempo</div>                    <div class="feature-text">Integração com API meteorológica para prever o clima no dia do evento.</div>                </div>            </div>            <div class="col-md-6 col-lg-4">                <div class="feature-card">                    <div class="feature-icon">❤️</div>                    <div class="feature-title">Favoritos & Solidários</div>                    <div class="feature-text">Salve seus eventos preferidos e filtre apenas eventos solidários.</div>                </div>            </div>            <div class="col-md-6 col-lg-4">                <div class="feature-card">                    <div class="feature-icon">🎯</div>                    <div class="feature-title">Recomendação Inteligente</div>                    <div class="feature-text">Eventos personalizados com base nos seus interesses e categorias.</div>                </div>            </div>            <div class="col-md-6 col-lg-4">                <div class="feature-card">                    <div class="feature-icon">🛡️</div>                    <div class="feature-title">Curadoria Administrativa</div>                    <div class="feature-text">Eventos passam por aprovação antes da publicação no mapa.</div>                </div>            </div>        </div>    </div></section>
+
+<section class="cta-section">
+    <div class="container">
+        <div class="cta-box">
+            <div class="cta-content">
+                <h2 class="cta-title">Pronto para descobrir<br>sua próxima experiência?</h2>
+                <p class="cta-sub">Explore eventos urbanos de forma moderna, inteligente e totalmente interativa — no mapa ou em lista.</p>
+                <div class="d-flex gap-3 justify-content-center flex-wrap">
+                    <a href="http://192.168.1.6:8000/mapa/" class="btn btn-vibe btn-lg">Explorar no Mapa</a>
+                    <a href="http://192.168.1.6:8000/usuarios/login/" class="btn btn-outline-vibe btn-lg">Criar Conta Grátis</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<footer class="footer">
+    <div class="container d-flex justify-content-between flex-wrap gap-3">
+        <div>© 2026 VibeEvents</div>
+        <div>Plataforma inteligente de eventos urbanos em Palmas.</div>
+    </div>
+</footer>
+
+<script src="static/bootstrap-5.3.8/js/bootstrap.bundle.min.js"></script>
+<script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+<script>
+    // NAVBAR
+    const navbar = document.getElementById('navbar');
+    window.addEventListener('scroll', () => {
+        navbar.classList.toggle('navbar-scrolled', window.scrollY > 20);
+    });
+    // MAP
+    const map = L.map('landing-map', {
+        zoomControl:false, dragging:false,
+        scrollWheelZoom:false, doubleClickZoom:false,
+        boxZoom:false, keyboard:false, touchZoom:false
+    }).setView([-10.184, -48.333], 13);
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        attribution:'© OpenStreetMap'
+    }).addTo(map);
+    const eventos = [
+        { nome:'Show ao Vivo',         coords:[-10.184, -48.333] },
+        { nome:'Festival Cultural',    coords:[-10.192, -48.325] },
+        { nome:'Evento Tech',          coords:[-10.176, -48.340] },
+        { nome:'Arraiá',               coords:[-10.170, -48.315] },
+        { nome:'Feira Gastronômica',   coords:[-10.200, -48.350] }
+    ];
+    eventos.forEach(evento => {
+        L.circleMarker(evento.coords, {
+            radius:10, fillColor:'#7DACFD', color:'#ffffff',
+            weight:2, opacity:1, fillOpacity:1
+        }).addTo(map).bindPopup(`<b>${evento.nome}</b>`);
+    });
+</script>
+</body>
+</html>

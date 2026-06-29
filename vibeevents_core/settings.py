@@ -5,12 +5,8 @@ from decouple import config
 BASE_DIR = Path(__file__).resolve().parent.parent
 
 SECRET_KEY = config('SECRET_KEY')
-DEBUG = config('DEBUG', default=False, cast=bool)
-ALLOWED_HOSTS = [
-    'localhost',
-    '127.0.0.1',
-    'disliking-appetite-matador.ngrok-free.dev',
-]
+DEBUG = config('DEBUG', default=True, cast=bool)
+ALLOWED_HOSTS = ['*']
 
 INSTALLED_APPS = [
     'eventos',
@@ -102,9 +98,10 @@ LEAFLET_CONFIG = {
 }
 
 CSRF_TRUSTED_ORIGINS = [
-    'https://halogen-delay-uncharted.ngrok-free.dev',
+    'http://127.0.0.1:8000',
+    'http://localhost:8000',
+    'https://*.ngrok-free.dev', 
 ]
-
 LOGIN_REDIRECT_URL = 'mapa_eventos'
 LOGOUT_REDIRECT_URL = 'mapa_eventos'
 LOGIN_URL = 'login' 
